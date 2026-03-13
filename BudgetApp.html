@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Budget App</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --income: #10b981;
+  --expense: #ef4444;
+  --bg: #f8fafc;
+  --card: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  justify-content: center;
+  padding: 40px 15px;
+  transition: 0.3s;
+}
+
+.dark {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+}
+
+.app {
+  width: 100%;
+  max-width: 500px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.dark .card {
+  background: #1f2937;
+  color: white;
+}
+
+h1 {
+  text-align: center;
+  color: white;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+h2, h3 {
+  margin-top: 0;
+  font-weight: 600;
+}
+
+.balance {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stat {
+  font-weight: 500;
+}
+
+.stat.income { color: var(--income); }
+.stat.expense { color: var(--expense); }
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-family: inherit;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--primary);
+  color: white;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.secondary-btn {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.secondary-btn:hover {
+  background: #d1d5db;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: #f9fafb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.dark li {
+  background: #374151;
+}
+
+.tx-amount.income { color: var(--income); }
+.tx-amount.expense { color: var(--expense); }
+
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.category-card {
+  background: #eef2ff;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.dark .category-card {
+  background: #312e81;
+}
+
+.warning {
+  color: var(--expense);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.toggle {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.toggle button {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>Budget App</h1>
+
+<div class="toggle">
+  <button onclick="toggleDark()">Toggle Dark Mode</button>
+</div>
+
+<div class="card">
+  <div class="balance" id="balance">$0.00</div>
+  <div class="stats">
+    <div class="stat income" id="income">Income: $0</div>
+    <div class="stat expense" id="expense">Expense: $0</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Monthly Budget</h3>
+  <input type="number" id="budgetInput" placeholder="Enter budget" />
+  <button onclick="setBudget()">Save Budget</button>
+  <div id="budgetWarning" class="warning"></div>
+</div>
+
+<div class="card">
+  <h3>Add Transaction</h3>
+  <input type="text" id="text" placeholder="Description" />
+  <input type="number" id="amount" placeholder="Amount (e.g. -20, 50)" />
+  <select id="category">
+    <option>Food</option>
+    <option>Rent</option>
+    <option>Entertainment</option>
+    <option>Utilities</option>
+    <option>Other</option>
+  </select>
+  <button onclick="addTx()">Add Transaction</button>
+</div>
+
+<div class="card">
+  <h3>Search & Sort</h3>
+  <input type="text" id="search" placeholder="Search..." oninput="searchTx()" />
+  <button class="secondary-btn" onclick="sortByAmount()">Sort by Amount</button>
+  <button class="secondary-btn" onclick="exportJSON()">Export JSON</button>
+</div>
+
+<div class="card">
+  <h3>Category Summary</h3>
+  <div class="category-grid" id="categorySummary"></div>
+</div>
+
+<div class="card">
+  <h3>Transactions</h3>
+  <ul id="list"></ul>
+</div>
+
+</div>
+
+<script>
+let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+let budget = localStorage.getItem('budget') || 0;
+
+function updateUI() {
+  const listEl = document.getElementById('list');
+  const summaryEl = document.getElementById('categorySummary');
+
+  listEl.innerHTML = '';
+  summaryEl.innerHTML = '';
+
+  let balance = 0, income = 0, expense = 0;
+  let categoryTotals = {};
+
+  transactions.forEach(tx => {
+
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span>${tx.text}</span>
+      <span class="tx-amount ${tx.amount > 0 ? 'income':'expense'}">
+        $${tx.amount}
+        <button onclick="deleteTx(${tx.id})" style="margin-left:6px;background:none;color:gray;">✕</button>
+      </span>
+    `;
+    listEl.appendChild(li);
+
+    balance += tx.amount;
+    if (tx.amount > 0) income += tx.amount;
+    else expense += tx.amount;
+
+    if (!categoryTotals[tx.category]) {
+      categoryTotals[tx.category] = 0;
+    }
+    categoryTotals[tx.category] += Math.abs(tx.amount); // still flawed on purpose
+  });
+
+  for (let cat in categoryTotals) {
+    const div = document.createElement('div');
+    div.className = 'category-card';
+    div.innerHTML = `<strong>${cat}</strong><br>$${categoryTotals[cat].toFixed(2)}`;
+    summaryEl.appendChild(div);
+  }
+
+  document.getElementById('balance').textContent = "$" + balance.toFixed(2);
+  document.getElementById('income').textContent = "Income: $" + income.toFixed(2);
+  document.getElementById('expense').textContent = "Expense: $" + Math.abs(expense).toFixed(2);
+
+  if (Math.abs(expense) > budget) {
+    document.getElementById('budgetWarning').textContent = "⚠ You exceeded your monthly budget!";
+  }
+
+  localStorage.setItem('transactions', JSON.stringify(transactions));
+}
+
+function addTx() {
+  const text = document.getElementById('text').value.trim();
+  const amount = parseFloat(document.getElementById('amount').value);
+  const category = document.getElementById('category').value;
+
+  if (!text || isNaN(amount)) return;
+
+  transactions.unshift({ id: Date.now(), text, amount, category });
+  updateUI();
+}
+
+function deleteTx(id) {
+  transactions = transactions.filter(tx => tx.id !== id);
+  updateUI();
+}
+
+function setBudget() {
+  budget = parseFloat(document.getElementById('budgetInput').value);
+  localStorage.setItem('budget', budget);
+  updateUI();
+}
+
+function searchTx() {
+  const query = document.getElementById('search').value;
+  const filtered = transactions.filter(tx => tx.text.includes(query));
+  document.getElementById('list').innerHTML = '';
+  filtered.forEach(tx => {
+    const li = document.createElement('li');
+    li.textContent = tx.text + " - $" + tx.amount;
+    document.getElementById('list').appendChild(li);
+  });
+}
+
+function sortByAmount() {
+  transactions.sort((a,b) => a.amount.toString().localeCompare(b.amount.toString()));
+  updateUI();
+}
+
+function exportJSON() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions));
+  const a = document.createElement('a');
+  a.href = dataStr;
+  a.download = "transactions.json";
+  a.click();
+}
+
+function toggleDark() {
+  document.body.classList.toggle('dark');
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
