@@ -1,6 +1,7 @@
-﻿import { format } from 'date-fns'
+﻿import { useState } from 'react'
+import { format } from 'date-fns'
 import { Link } from 'react-router-dom'
-
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -10,6 +11,15 @@ import { formatCurrency } from '@/lib/utils'
 import type { Database } from '@/types/database'
 
 type Transaction = Database['public']['Tables']['transactions']['Row']
+type SortKey = 'merchant' | 'category_name' | 'type' | 'transaction_date' | 'amount'
+type SortDirection = 'asc' | 'desc'
+
+function SortIcon({ column, sortKey, sortDirection }: { column: SortKey; sortKey: SortKey | null; sortDirection: SortDirection }) {
+  if (sortKey !== column) return <ChevronsUpDown className="ml-1 inline h-3.5 w-3.5 text-ink/30" />
+  return sortDirection === 'asc'
+    ? <ChevronUp className="ml-1 inline h-3.5 w-3.5" />
+    : <ChevronDown className="ml-1 inline h-3.5 w-3.5" />
+}
 
 export function TransactionList({
   transactions,
@@ -21,10 +31,56 @@ export function TransactionList({
   const { t, i18n } = useAppTranslation()
   const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA'
 
+  const [sortKey, setSortKey] = useState<SortKey | null>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDirection('asc')
+    }
+  }
+
+  const sorted = [...transactions].sort((a, b) => {
+    if (!sortKey) return 0
+    let valA = a[sortKey]
+    let valB = b[sortKey]
+
+    // Normalize nulls to the bottom regardless of direction
+    if (valA == null) return 1
+    if (valB == null) return -1
+
+    if (sortKey === 'amount') {
+      return sortDirection === 'asc' ? (valA as number) - (valB as number) : (valB as number) - (valA as number)
+    }
+
+    if (sortKey === 'transaction_date') {
+      return sortDirection === 'asc'
+        ? new Date(valA as string).getTime() - new Date(valB as string).getTime()
+        : new Date(valB as string).getTime() - new Date(valA as string).getTime()
+    }
+
+    // String comparison for merchant, category_name, type
+    return sortDirection === 'asc'
+      ? String(valA).localeCompare(String(valB))
+      : String(valB).localeCompare(String(valA))
+  })
+
+  const columns: { key: SortKey; label: string; className?: string }[] = [
+    { key: 'merchant',        label: t('transactions.merchant') },
+    { key: 'category_name',   label: t('transactions.category') },
+    { key: 'type',            label: t('transactions.type') },
+    { key: 'transaction_date',label: t('transactions.date') },
+    { key: 'amount',          label: t('transactions.amount'), className: 'text-right' },
+  ]
+
   return (
     <>
+      {/* Mobile cards — unchanged, no sorting UI */}
       <div className="space-y-3 lg:hidden">
-        {transactions.map((transaction) => (
+        {sorted.map((transaction) => (
           <Card key={transaction.id}>
             <CardContent className="space-y-3 p-5">
               <div className="flex items-start justify-between gap-4">
@@ -48,20 +104,28 @@ export function TransactionList({
           </Card>
         ))}
       </div>
+
+      {/* Desktop table — sortable headers */}
       <div className="hidden overflow-hidden rounded-[28px] border border-border bg-card shadow-soft lg:block">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('transactions.merchant')}</TableHead>
-              <TableHead>{t('transactions.category')}</TableHead>
-              <TableHead>{t('transactions.type')}</TableHead>
-              <TableHead>{t('transactions.date')}</TableHead>
-              <TableHead className="text-right">{t('transactions.amount')}</TableHead>
-              <TableHead></TableHead>
+              {columns.map(({ key, label, className }) => (
+                <TableHead key={key} className={className}>
+                  <button
+                    className="flex items-center gap-0.5 hover:text-foreground transition-colors"
+                    onClick={() => handleSort(key)}
+                  >
+                    {label}
+                    <SortIcon column={key} sortKey={sortKey} sortDirection={sortDirection} />
+                  </button>
+                </TableHead>
+              ))}
+              <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.map((transaction) => (
+            {sorted.map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell>{transaction.merchant}</TableCell>
                 <TableCell>{transaction.category_name}</TableCell>
@@ -82,4 +146,3 @@ export function TransactionList({
     </>
   )
 }
-
