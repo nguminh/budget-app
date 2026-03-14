@@ -1,4 +1,4 @@
-﻿{
+{
   "app": {
     "name": "Maple Ledger",
     "tagline": "A practical monthly budget, without the noise."
@@ -80,7 +80,17 @@
     "remaining": "Remaining",
     "progress": "Budget progress",
     "success": "Budget saved.",
-    "empty": "No budget set for this month yet."
+    "empty": "No budget set for this month yet.",
+    "allocations": "Category allocations",
+    "allocationsHint": "Adjust your category targets and any remaining budget flows automatically into Other.",
+    "autoAssigned": "Auto-assigned",
+    "autoAssignedHint": "Automatically adjusted to keep the full budget balanced.",
+    "otherFallback": "Other",
+    "shareOfBudget": "{{value}}% of total budget",
+    "maxForCategory": "Max {{amount}} right now",
+    "categorySliderLabel": "{{category}} budget slider",
+    "categoryInputLabel": "{{category}} budget amount",
+    "noExpenseCategories": "No expense categories are available yet."
   },
   "settings": {
     "title": "Settings",
@@ -117,4 +127,3 @@
     "noteMax": "Keep the note under 280 characters."
   }
 }
-

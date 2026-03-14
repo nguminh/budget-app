@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useMemo } from 'react'
 import { ArrowUpRight, PiggyBank, Receipt, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -9,31 +9,41 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardChartFallback } from '@/features/dashboard/components/ExpensesPieChart'
 import { useDashboardSummary } from '@/features/dashboard/hooks/useDashboardSummary'
+import { getBudgetBucketTracking } from '@/features/budgets/lib/budgetBuckets'
 import { useBudget } from '@/hooks/useBudget'
+import { useCategories } from '@/hooks/useCategories'
 import { useTransactions } from '@/hooks/useTransactions'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
 import { formatCurrency, formatMonthInput } from '@/lib/utils'
 
-const ExpensesPieChart = lazy(async () => ({ default: (await import('@/features/dashboard/components/ExpensesPieChart')).ExpensesPieChart }))
+const ExpensesPieChart = lazy(() => import('@/features/dashboard/components/ExpensesPieChart'))
 
 export function DashboardPage() {
   const month = formatMonthInput()
   const { t, i18n } = useAppTranslation()
   const { transactions, error, isError, isFetching, isLoading } = useTransactions({ currentMonthOnly: true })
-  const { budget } = useBudget(month)
+  const { budget, categoryBudgets } = useBudget(month)
+  const { categories, error: categoriesError, isLoading: categoriesLoading } = useCategories()
   const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA'
   const { budgetAmount, expenses, grouped, income, recent, remaining } = useDashboardSummary({
     budget,
     noCategoryLabel: t('common.noCategory'),
     transactions,
   })
+  const categoryTracking = useMemo(
+    () =>
+      getBudgetBucketTracking({ categories, categoryBudgets, transactions })
+        .filter((bucket) => bucket.showInDashboard)
+        .slice(0, 5),
+    [categories, categoryBudgets, transactions],
+  )
 
-  if (isLoading && transactions.length === 0) {
+  if ((isLoading && transactions.length === 0) || categoriesLoading) {
     return <LoadingState label={t('common.loading')} />
   }
 
-  if (isError && error) {
-    return <ErrorState title={t('dashboard.title')} description={error} />
+  if ((isError && error) || categoriesError) {
+    return <ErrorState title={t('dashboard.title')} description={error || categoriesError || t('common.loading')} />
   }
 
   return (
@@ -47,31 +57,37 @@ export function DashboardPage() {
       {transactions.length === 0 ? (
         <EmptyState title={t('dashboard.empty')} description={t('dashboard.emptyHint')} />
       ) : (
-        <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="grid gap-6 xl:grid-cols-[1.1fr_1fr]">
           <Suspense fallback={<DashboardChartFallback />}>
             <ExpensesPieChart data={grouped} locale={locale} title={t('dashboard.chartTitle')} />
           </Suspense>
           <div className="space-y-6">
             <Card>
-              <CardHeader>
+              <CardHeader className="space-y-3">
                 <CardTitle>{t('dashboard.budgetTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="h-4 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-accent" style={{ width: `${budgetAmount > 0 ? Math.min((expenses / budgetAmount) * 100, 100) : 0}%` }} />
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl bg-muted p-4">
-                      <p className="font-body text-xs uppercase tracking-[0.2em] text-ink/55">{t('dashboard.budgetUsed')}</p>
-                      <p className="mt-2 text-2xl font-semibold">{formatCurrency(expenses, 'CAD', locale)}</p>
-                    </div>
-                    <div className="rounded-2xl bg-muted p-4">
-                      <p className="font-body text-xs uppercase tracking-[0.2em] text-ink/55">{t('dashboard.budgetLeft')}</p>
-                      <p className="mt-2 text-2xl font-semibold">{formatCurrency(remaining, 'CAD', locale)}</p>
-                    </div>
-                  </div>
+                <div className="flex items-end gap-6">
+                  <p className="text-2xl font-semibold">{formatCurrency(expenses, 'CAD', locale)}</p>
+                  <p className="text-2xl font-semibold text-ink/60">{formatCurrency(remaining, 'CAD', locale)}</p>
                 </div>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-0">
+                {categoryTracking.map((bucket) => {
+                  const progress = bucket.budgetAmount > 0 ? Math.min((bucket.spentAmount / bucket.budgetAmount) * 100, 100) : 0
+
+                  return (
+                    <div key={bucket.key} className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-medium text-foreground">{bucket.label}</p>
+                        <p className="font-body text-sm text-ink/60">
+                          {formatCurrency(bucket.spentAmount, 'CAD', locale)} / {formatCurrency(bucket.budgetAmount, 'CAD', locale)}
+                        </p>
+                      </div>
+                      <div className="h-3 overflow-hidden rounded-full bg-muted/80" style={{ border: `1px solid ${bucket.color}55` }}>
+                        <div className="h-full rounded-full" style={{ backgroundColor: bucket.color, width: `${progress}%` }} />
+                      </div>
+                    </div>
+                  )
+                })}
               </CardContent>
             </Card>
             <Card>
@@ -99,4 +115,7 @@ export function DashboardPage() {
     </div>
   )
 }
+
+export default DashboardPage
+
 
