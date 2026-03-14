@@ -36,6 +36,7 @@ export function BudgetsPage() {
 
   const budgetAmount = budget ? Number(budget.amount) : budgetBuckets.reduce((sum, bucket) => sum + bucket.amount, 0)
   const remaining = budgetAmount - expenses
+  const progressPercent = budgetAmount > 0 ? Math.min((expenses / budgetAmount) * 100, 100) : 0
   const showInitialLoading = (!isFetched && isLoading) || (!txFetched && txLoading) || categoriesLoading
   const initialValues = useMemo(
     () => ({
@@ -75,11 +76,23 @@ export function BudgetsPage() {
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+    <div className="space-y-6">
+      {!budget && categoryBudgets.length === 0 ? <EmptyState title={t('budgets.empty')} description={t('dashboard.budgetMissing')} /> : null}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('budgets.current')}</CardTitle>
-          {isFetching || txFetching ? <p className="font-body text-xs uppercase tracking-[0.2em] text-ink/50">{t('common.loading')}</p> : null}
+        <CardHeader className="space-y-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <CardTitle>{t('budgets.current')}</CardTitle>
+              {isFetching || txFetching ? <p className="mt-2 font-body text-xs uppercase tracking-[0.2em] text-ink/50">{t('common.loading')}</p> : null}
+            </div>
+            <div className="flex items-end gap-6">
+              <p className="text-2xl font-semibold">{formatCurrency(expenses, 'CAD', locale)}</p>
+              <p className="text-2xl font-semibold text-ink/60">{formatCurrency(remaining, 'CAD', locale)}</p>
+            </div>
+          </div>
+          <div className="h-3 overflow-hidden rounded-full bg-muted">
+            <div className="h-full rounded-full bg-accent" style={{ width: `${progressPercent}%` }} />
+          </div>
         </CardHeader>
         <CardContent>
           <BudgetForm
@@ -91,26 +104,8 @@ export function BudgetsPage() {
           />
         </CardContent>
       </Card>
-      <div className="space-y-6">
-        {!budget && categoryBudgets.length === 0 ? <EmptyState title={t('budgets.empty')} description={t('dashboard.budgetMissing')} /> : null}
-        <Card>
-          <CardHeader className="space-y-3">
-            <CardTitle>{t('budgets.progress')}</CardTitle>
-            <div className="flex items-end gap-6">
-              <p className="text-2xl font-semibold">{formatCurrency(expenses, 'CAD', locale)}</p>
-              <p className="text-2xl font-semibold text-ink/60">{formatCurrency(remaining, 'CAD', locale)}</p>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="h-3 overflow-hidden rounded-full bg-muted">
-              <div className="h-full rounded-full bg-accent" style={{ width: `${budgetAmount > 0 ? Math.min((expenses / budgetAmount) * 100, 100) : 0}%` }} />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }
 
 export default BudgetsPage
-
