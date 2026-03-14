@@ -1,6 +1,15 @@
+import { useState } from 'react'
+import { transactions as allTransactions } from '../data/mockData.js'
+import { AddTransactionForm } from '../components/transactions/AddTransactionForm.jsx'
 import { TransactionsPanel } from '../components/transactions/TransactionsPanel.jsx'
 
 export function TransactionsPage() {
+  const [transactions, setTransactions] = useState(allTransactions)
+
+  const handleAddTransaction = (newTransaction) => {
+    setTransactions([newTransaction, ...transactions])
+  }
+
   return (
     <div className="page-stack">
       <div className="panel">
@@ -10,7 +19,8 @@ export function TransactionsPage() {
           integrations can be built independently.
         </p>
       </div>
-      <TransactionsPanel />
+      <AddTransactionForm onAddTransaction={handleAddTransaction} />
+      <TransactionsPanel transactions={transactions}/>
     </div>
   )
 }

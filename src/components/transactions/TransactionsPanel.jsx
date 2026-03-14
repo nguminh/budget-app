@@ -8,23 +8,28 @@ const sorters = {
   merchant: (a, b) => a.merchant.localeCompare(b.merchant),
 }
 
-export function TransactionsPanel({ limit }) {
+export function TransactionsPanel({ transactions = [], limit }) {
   const [query, setQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
 
   const visibleTransactions = useMemo(() => {
+    // 2. We use the prop directly now
     const normalizedQuery = query.trim().toLowerCase()
-    const filtered = allTransactions.filter((transaction) => {
+    
+    // 3. Optional: Add a "Guard Clause" just in case the prop is sent as null
+    if (!Array.isArray(transactions)) return []
+
+    const filtered = transactions.filter((transaction) => {
+      // Use optional chaining (?.) if merchant or category might be missing
       return (
-        transaction.merchant.toLowerCase().includes(normalizedQuery) ||
-        transaction.category.toLowerCase().includes(normalizedQuery)
+        transaction.merchant?.toLowerCase().includes(normalizedQuery) ||
+        transaction.category?.toLowerCase().includes(normalizedQuery)
       )
     })
 
     const sorted = [...filtered].sort(sorters[sortBy])
     return typeof limit === 'number' ? sorted.slice(0, limit) : sorted
-  }, [limit, query, sortBy])
-
+  }, [limit, query, sortBy, transactions])
   return (
     <section className="page-stack">
       <div className="section-heading">
