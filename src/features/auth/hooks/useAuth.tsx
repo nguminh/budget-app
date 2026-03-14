@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 
 import i18n from '@/i18n'
@@ -44,44 +44,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [profileLoading, setProfileLoading] = useState(false)
+  const currentUserIdRef = useRef<string | null>(null)
 
-  const refreshProfile = useCallback(async () => {
-    if (!user || supabaseConfigError) {
-      setProfile(null)
-      setProfileLoading(false)
-      return
-    }
+  const applySession = useCallback((nextSession: Session | null) => {
+    const nextUser = nextSession?.user ?? null
+    const nextUserId = nextUser?.id ?? null
+    const previousUserId = currentUserIdRef.current
 
-    setProfileLoading(true)
-
-    try {
-      const nextProfile = await fetchProfile(user.id, user)
-      setProfile(nextProfile)
-    } finally {
-      setProfileLoading(false)
-    }
-  }, [user])
-
-  const syncSession = useEffectEvent(async (nextSession: Session | null) => {
+    currentUserIdRef.current = nextUserId
     setSession(nextSession)
-    setUser(nextSession?.user ?? null)
+    setUser(nextUser)
     setLoading(false)
 
-    if (!nextSession?.user || supabaseConfigError) {
+    if (!nextUserId || supabaseConfigError) {
       queryClient.clear()
       setProfile(null)
       setProfileLoading(false)
       return
     }
 
+    if (previousUserId && previousUserId !== nextUserId) {
+      queryClient.clear()
+      setProfile(null)
+    }
+  }, [])
+
+  const loadProfile = useCallback(async (nextUser: User | null) => {
+    if (!nextUser || supabaseConfigError) {
+      setProfile(null)
+      setProfileLoading(false)
+      return
+    }
+
     setProfileLoading(true)
 
     try {
-      setProfile(await fetchProfile(nextSession.user.id, nextSession.user))
+      const nextProfile = await fetchProfile(nextUser.id, nextUser)
+      setProfile(nextProfile)
+    } catch {
+      setProfile(null)
     } finally {
       setProfileLoading(false)
     }
-  })
+  }, [])
+
+  const refreshProfile = useCallback(async () => {
+    await loadProfile(user)
+  }, [loadProfile, user])
 
   useEffect(() => {
     if (!profile?.locale) {
@@ -93,6 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [profile?.locale])
 
   useEffect(() => {
+    void loadProfile(user)
+  }, [loadProfile, user])
+
+  useEffect(() => {
     if (supabaseConfigError) {
       setLoading(false)
       return
@@ -100,27 +113,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let mounted = true
 
-    supabase.auth.getSession().then(async ({ data }) => {
+    const bootstrapSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession()
+
+        if (!mounted) {
+          return
+        }
+
+        applySession(data.session)
+      } catch {
+        if (!mounted) {
+          return
+        }
+
+        queryClient.clear()
+        setSession(null)
+        setUser(null)
+        setProfile(null)
+        setProfileLoading(false)
+        setLoading(false)
+      }
+    }
+
+    void bootstrapSession()
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!mounted) {
         return
       }
 
-      await syncSession(data.session)
-    })
-
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
-      if (!mounted) {
-        return
-      }
-
-      await syncSession(nextSession)
+      applySession(nextSession)
     })
 
     return () => {
       mounted = false
       listener.subscription.unsubscribe()
     }
-  }, [])
+  }, [applySession])
 
   const value = useMemo(
     () => ({ user, session, profile, loading, profileLoading, refreshProfile }),
@@ -137,4 +167,3 @@ export function useAuth() {
   }
   return context
 }
-
