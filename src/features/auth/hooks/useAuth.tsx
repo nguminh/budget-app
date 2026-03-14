@@ -1,9 +1,9 @@
-﻿import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 
 import i18n from '@/i18n'
 import { LANGUAGE_STORAGE_KEY } from '@/lib/constants'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseConfigError } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -32,7 +32,7 @@ async function fetchProfile(userId: string, user: User | null) {
     plan: 'free' as const,
   }
 
-  const { data: inserted } = await supabase.from('profiles').upsert(fallbackProfile).select('*').maybeSingle()
+  const { data: inserted } = await supabase.from('profiles').upsert(fallbackProfile as never).select('*').maybeSingle()
   return inserted ?? null
 }
 
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const refreshProfile = async () => {
-    if (!user) {
+    if (!user || supabaseConfigError) {
       setProfile(null)
       return
     }
@@ -62,6 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [profile?.locale])
 
   useEffect(() => {
+    if (supabaseConfigError) {
+      setLoading(false)
+      return
+    }
+
     let mounted = true
 
     supabase.auth.getSession().then(async ({ data }) => {
@@ -106,4 +111,3 @@ export function useAuth() {
   }
   return context
 }
-

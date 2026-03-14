@@ -1,23 +1,33 @@
-﻿import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
 import type { Database } from '@/types/database'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Missing Supabase environment variables.')
+function readEnv(key: string) {
+  return import.meta.env[key] ?? import.meta.env[String.fromCharCode(0xfeff) + key]
 }
 
-export const supabase = createClient<Database>(
-  supabaseUrl ?? 'https://example.supabase.co',
-  supabaseAnonKey ?? 'public-anon-key',
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  },
-)
+const supabaseUrl = readEnv('VITE_SUPABASE_URL')?.trim()
+const supabaseAnonKey = readEnv('VITE_SUPABASE_ANON_KEY')?.trim()
 
+function getSupabaseConfigError() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return 'Missing Supabase environment variables. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart Vite.'
+  }
+
+  try {
+    new URL(supabaseUrl)
+    return null
+  } catch {
+    return `Invalid VITE_SUPABASE_URL: "${supabaseUrl}"`
+  }
+}
+
+export const supabaseConfigError = getSupabaseConfigError()
+
+export const supabase = createClient<Database>(supabaseUrl ?? 'http://127.0.0.1', supabaseAnonKey ?? 'missing-anon-key', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+})

@@ -1,4 +1,4 @@
-﻿import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -8,14 +8,26 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { buildAuthSchema } from '@/lib/validations/auth'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseConfigError } from '@/lib/supabase'
+import { buildAuthSchema } from '@/lib/validations/auth'
 
 type AuthValues = {
   fullName?: string
   email: string
   password: string
+}
+
+function getAuthErrorMessage(error: unknown) {
+  if (error instanceof TypeError) {
+    return 'Unable to reach Supabase. Verify VITE_SUPABASE_URL, then restart the Vite dev server.'
+  }
+
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return 'Authentication failed. Please try again.'
 }
 
 export function AuthForm() {
@@ -25,7 +37,7 @@ export function AuthForm() {
   const { t } = useAppTranslation()
   const schema = buildAuthSchema(t, isSignup)
 
-  const form = useForm<AuthValues>({
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: { fullName: '', email: '', password: '' },
   })
@@ -33,37 +45,47 @@ export function AuthForm() {
   const onSubmit = form.handleSubmit(async (values) => {
     setSubmitting(true)
 
-    if (isSignup) {
-      const { error } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: { full_name: values.fullName },
-        },
-      })
-
-      if (error) {
-        toast.error(error.message)
-      } else {
-        toast.success(t('auth.successSignup'))
-        setIsSignup(false)
-        form.reset({ fullName: '', email: values.email, password: '' })
-      }
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      })
-
-      if (error) {
-        toast.error(error.message)
-      } else {
-        toast.success(t('auth.successSignin'))
-        navigate('/dashboard', { replace: true })
-      }
+    if (supabaseConfigError) {
+      toast.error(supabaseConfigError)
+      setSubmitting(false)
+      return
     }
 
-    setSubmitting(false)
+    try {
+      if (isSignup) {
+        const { error } = await supabase.auth.signUp({
+          email: values.email,
+          password: values.password,
+          options: {
+            data: { full_name: values.fullName },
+          },
+        })
+
+        if (error) {
+          toast.error(error.message)
+        } else {
+          toast.success(t('auth.successSignup'))
+          setIsSignup(false)
+          form.reset({ fullName: '', email: values.email, password: '' })
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        })
+
+        if (error) {
+          toast.error(error.message)
+        } else {
+          toast.success(t('auth.successSignin'))
+          navigate('/dashboard', { replace: true })
+        }
+      }
+    } catch (error) {
+      toast.error(getAuthErrorMessage(error))
+    } finally {
+      setSubmitting(false)
+    }
   })
 
   return (
@@ -104,4 +126,3 @@ export function AuthForm() {
     </Card>
   )
 }
-
