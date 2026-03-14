@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState, type ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 
 import i18n from '@/i18n'
@@ -13,6 +13,7 @@ type AuthContextValue = {
   session: Session | null
   profile: Profile | null
   loading: boolean
+  profileLoading: boolean
   refreshProfile: () => Promise<void>
 }
 
@@ -41,16 +42,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(false)
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (!user || supabaseConfigError) {
       setProfile(null)
+      setProfileLoading(false)
       return
     }
 
-    const nextProfile = await fetchProfile(user.id, user)
-    setProfile(nextProfile)
-  }
+    setProfileLoading(true)
+
+    try {
+      const nextProfile = await fetchProfile(user.id, user)
+      setProfile(nextProfile)
+    } finally {
+      setProfileLoading(false)
+    }
+  }, [user])
+
+  const syncSession = useEffectEvent(async (nextSession: Session | null) => {
+    setSession(nextSession)
+    setUser(nextSession?.user ?? null)
+    setLoading(false)
+
+    if (!nextSession?.user || supabaseConfigError) {
+      setProfile(null)
+      setProfileLoading(false)
+      return
+    }
+
+    setProfileLoading(true)
+
+    try {
+      setProfile(await fetchProfile(nextSession.user.id, nextSession.user))
+    } finally {
+      setProfileLoading(false)
+    }
+  })
 
   useEffect(() => {
     if (!profile?.locale) {
@@ -74,23 +103,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      setSession(data.session)
-      setUser(data.session?.user ?? null)
-      if (data.session?.user) {
-        setProfile(await fetchProfile(data.session.user.id, data.session.user))
-      }
-      setLoading(false)
+      await syncSession(data.session)
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
-      setSession(nextSession)
-      setUser(nextSession?.user ?? null)
-      if (nextSession?.user) {
-        setProfile(await fetchProfile(nextSession.user.id, nextSession.user))
-      } else {
-        setProfile(null)
+      if (!mounted) {
+        return
       }
-      setLoading(false)
+
+      await syncSession(nextSession)
     })
 
     return () => {
@@ -99,7 +120,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const value = useMemo(() => ({ user, session, profile, loading, refreshProfile }), [loading, profile, session, user])
+  const value = useMemo(
+    () => ({ user, session, profile, loading, profileLoading, refreshProfile }),
+    [loading, profile, profileLoading, refreshProfile, session, user],
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

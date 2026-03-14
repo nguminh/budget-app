@@ -1,6 +1,7 @@
-﻿import { useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAsyncResource } from '@/hooks/useAsyncResource'
 import { supabase } from '@/lib/supabase'
 import { normalizeBudgetMonth } from '@/lib/utils'
 import type { Database } from '@/types/database'
@@ -9,40 +10,38 @@ type Budget = Database['public']['Tables']['budgets']['Row']
 
 export function useBudget(month: string) {
   const { user } = useAuth()
-  const [budget, setBudget] = useState<Budget | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const cacheKey = user ? `budget:${user.id}:${normalizeBudgetMonth(month)}` : undefined
 
-  const loadBudget = async () => {
+  const loadBudget = useCallback(async () => {
     if (!user) {
-      setBudget(null)
-      setLoading(false)
-      return
+      return null
     }
 
-    setLoading(true)
-    const { data, error: nextError } = await supabase
+    const { data, error } = await supabase
       .from('budgets')
       .select('*')
+      .eq('user_id', user.id)
       .eq('period_month', normalizeBudgetMonth(month))
       .is('category_id', null)
       .maybeSingle()
 
-    if (nextError) {
-      setError(nextError.message)
-      setBudget(null)
-    } else {
-      setError(null)
-      setBudget(data ?? null)
+    if (error) {
+      throw error
     }
 
-    setLoading(false)
-  }
+    return data ?? null
+  }, [month, user?.id])
 
-  useEffect(() => {
-    void loadBudget()
-  }, [user?.id, month])
+  const { data, error, loading, refreshing, hasLoaded, reload } = useAsyncResource({
+    enabled: Boolean(user),
+    initialData: null as Budget | null,
+    load: loadBudget,
+    dependencies: [user?.id, month],
+    cacheKey,
+  })
 
-  return { budget, loading, error, reload: loadBudget }
+  return useMemo(
+    () => ({ budget: data, error, loading, refreshing, hasLoaded, reload }),
+    [data, error, hasLoaded, loading, refreshing, reload],
+  )
 }
-

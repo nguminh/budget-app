@@ -1,4 +1,4 @@
-﻿import { Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -18,10 +18,12 @@ export function TransactionsPage() {
   const { t } = useAppTranslation()
   const [typeFilter, setTypeFilter] = useState('all')
   const [monthFilter, setMonthFilter] = useState<'current' | 'all'>('all')
-  const { transactions, loading, error, reload } = useTransactions({
+  const { transactions, loading, refreshing, error, reload } = useTransactions({
     type: typeFilter,
     currentMonthOnly: monthFilter === 'current',
   })
+
+  const statusLabel = error && transactions.length > 0 ? error : refreshing ? t('common.loading') : null
 
   const handleDelete = async (transactionId: string) => {
     if (!window.confirm(t('transactions.deleteConfirm'))) {
@@ -45,6 +47,7 @@ export function TransactionsPage() {
           <div>
             <CardTitle>{t('transactions.title')}</CardTitle>
             <p className="font-body text-sm text-ink/70">{t('transactions.subtitle')}</p>
+            {statusLabel ? <p className="mt-2 font-body text-xs uppercase tracking-[0.2em] text-ink/50">{statusLabel}</p> : null}
           </div>
           <Button asChild>
             <Link to="/transactions/new"><Plus className="size-4" />{t('transactions.add')}</Link>
@@ -75,10 +78,9 @@ export function TransactionsPage() {
         </CardContent>
       </Card>
       {loading ? <LoadingState label={t('common.loading')} /> : null}
-      {!loading && error ? <ErrorState title={t('transactions.title')} description={error || t('transactions.loadError')} /> : null}
+      {!loading && error && transactions.length === 0 ? <ErrorState title={t('transactions.title')} description={error || t('transactions.loadError')} /> : null}
       {!loading && !error && transactions.length === 0 ? <EmptyState title={t('transactions.empty')} description={t('transactions.subtitle')} /> : null}
-      {!loading && !error && transactions.length > 0 ? <TransactionList transactions={transactions} onDelete={(id) => void handleDelete(id)} /> : null}
+      {!loading && transactions.length > 0 ? <TransactionList transactions={transactions} onDelete={(id) => void handleDelete(id)} /> : null}
     </div>
   )
 }
-

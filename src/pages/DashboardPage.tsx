@@ -1,4 +1,4 @@
-﻿import { ArrowUpRight, PiggyBank, Receipt, TrendingDown, TrendingUp } from 'lucide-react'
+import { ArrowUpRight, PiggyBank, Receipt, TrendingDown, TrendingUp } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -17,7 +17,7 @@ const COLORS = ['#1f6f5f', '#cb7c2c', '#b74f3b', '#6a8caf', '#92735f', '#8c5f7a'
 export function DashboardPage() {
   const month = formatMonthInput()
   const { t, i18n } = useAppTranslation()
-  const { transactions, loading, error } = useTransactions({ currentMonthOnly: true })
+  const { transactions, loading, refreshing, error } = useTransactions({ currentMonthOnly: true })
   const { budget } = useBudget(month)
   const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA'
 
@@ -50,7 +50,7 @@ export function DashboardPage() {
         <SummaryCard title={t('dashboard.expenses')} value={formatCurrency(expenses, 'CAD', locale)} description={t('dashboard.subtitle')} icon={TrendingDown} tone="warning" />
         <SummaryCard title={t('dashboard.income')} value={formatCurrency(income, 'CAD', locale)} description={t('dashboard.subtitle')} icon={TrendingUp} tone="success" />
         <SummaryCard title={t('dashboard.remaining')} value={formatCurrency(remaining, 'CAD', locale)} description={budget ? t('dashboard.ofBudget') : t('dashboard.budgetMissing')} icon={PiggyBank} />
-        <SummaryCard title={t('dashboard.count')} value={String(transactions.length)} description={t('dashboard.subtitle')} icon={Receipt} />
+        <SummaryCard title={t('dashboard.count')} value={String(transactions.length)} description={refreshing ? t('common.loading') : t('dashboard.subtitle')} icon={Receipt} />
       </section>
       {transactions.length === 0 ? (
         <EmptyState title={t('dashboard.empty')} description={t('dashboard.emptyHint')} />
@@ -128,4 +128,3 @@ export function DashboardPage() {
     </div>
   )
 }
-

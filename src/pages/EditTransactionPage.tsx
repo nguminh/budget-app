@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -24,6 +24,8 @@ export function EditTransactionPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let active = true
+
     async function loadTransaction() {
       if (!id) {
         setError('Missing transaction id.')
@@ -31,16 +33,38 @@ export function EditTransactionPage() {
         return
       }
 
-      const { data, error: fetchError } = await supabase.from('transactions').select('*').eq('id', id).maybeSingle()
-      if (fetchError) {
-        setError(fetchError.message)
-      } else {
+      try {
+        const { data, error: fetchError } = await supabase.from('transactions').select('*').eq('id', id).maybeSingle()
+
+        if (!active) {
+          return
+        }
+
+        if (fetchError) {
+          setError(fetchError.message)
+          return
+        }
+
+        setError(null)
         setTransaction(data ?? null)
+      } catch (nextError) {
+        if (!active) {
+          return
+        }
+
+        setError(nextError instanceof Error ? nextError.message : 'Unable to load this transaction right now.')
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
       }
-      setLoading(false)
     }
 
     void loadTransaction()
+
+    return () => {
+      active = false
+    }
   }, [id])
 
   const handleSubmit = async (values: {
@@ -132,4 +156,3 @@ export function EditTransactionPage() {
     </Card>
   )
 }
-

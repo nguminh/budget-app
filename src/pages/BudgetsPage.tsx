@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -18,8 +18,8 @@ export function BudgetsPage() {
   const { user } = useAuth()
   const [month, setMonth] = useState(formatMonthInput())
   const [submitting, setSubmitting] = useState(false)
-  const { budget, loading, error, reload } = useBudget(month)
-  const { transactions, loading: txLoading } = useTransactions({ month })
+  const { budget, loading, refreshing, error, reload } = useBudget(month)
+  const { transactions, loading: txLoading, refreshing: txRefreshing } = useTransactions({ month })
   const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA'
 
   const expenses = useMemo(
@@ -74,6 +74,7 @@ export function BudgetsPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t('budgets.current')}</CardTitle>
+          {refreshing || txRefreshing ? <p className="font-body text-xs uppercase tracking-[0.2em] text-ink/50">{t('common.loading')}</p> : null}
         </CardHeader>
         <CardContent>
           <BudgetForm initialValues={{ month, amount: budget ? Number(budget.amount) : 0 }} submitting={submitting} onSubmit={handleSubmit} />
@@ -109,4 +110,3 @@ export function BudgetsPage() {
     </div>
   )
 }
-

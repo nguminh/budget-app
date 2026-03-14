@@ -1,6 +1,7 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAsyncResource } from '@/hooks/useAsyncResource'
 import { supabase } from '@/lib/supabase'
 import { getMonthDateRange } from '@/lib/utils'
 import type { Database } from '@/types/database'
@@ -9,19 +10,20 @@ type Transaction = Database['public']['Tables']['transactions']['Row']
 
 export function useTransactions(filters: { type?: string; currentMonthOnly?: boolean; month?: string } = {}) {
   const { user } = useAuth()
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const cacheKey = user
+    ? `transactions:${user.id}:${filters.type ?? 'all'}:${filters.currentMonthOnly ? 'current' : 'all'}:${filters.month ?? 'none'}`
+    : undefined
 
-  const loadTransactions = async () => {
+  const loadTransactions = useCallback(async () => {
     if (!user) {
-      setTransactions([])
-      setLoading(false)
-      return
+      return []
     }
 
-    setLoading(true)
-    let query = supabase.from('transactions').select('*').order('transaction_date', { ascending: false })
+    let query = supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('transaction_date', { ascending: false })
 
     if (filters.type && filters.type !== 'all') {
       query = query.eq('type', filters.type as 'expense' | 'income')
@@ -33,23 +35,32 @@ export function useTransactions(filters: { type?: string; currentMonthOnly?: boo
       query = query.gte('transaction_date', range.start).lte('transaction_date', range.end)
     }
 
-    const { data, error: nextError } = await query
+    const { data, error } = await query
 
-    if (nextError) {
-      setError(nextError.message)
-      setTransactions([])
-    } else {
-      setError(null)
-      setTransactions(data ?? [])
+    if (error) {
+      throw error
     }
 
-    setLoading(false)
-  }
+    return data ?? []
+  }, [filters.currentMonthOnly, filters.month, filters.type, user?.id])
 
-  useEffect(() => {
-    void loadTransactions()
-  }, [user?.id, filters.type, filters.currentMonthOnly, filters.month])
+  const { data, error, loading, refreshing, hasLoaded, reload } = useAsyncResource({
+    enabled: Boolean(user),
+    initialData: [] as Transaction[],
+    load: loadTransactions,
+    dependencies: [user?.id, filters.type, filters.currentMonthOnly, filters.month],
+    cacheKey,
+  })
 
-  return useMemo(() => ({ transactions, loading, error, reload: loadTransactions }), [error, loading, transactions])
+  return useMemo(
+    () => ({
+      transactions: data,
+      error,
+      loading,
+      refreshing,
+      hasLoaded,
+      reload,
+    }),
+    [data, error, hasLoaded, loading, refreshing, reload],
+  )
 }
-

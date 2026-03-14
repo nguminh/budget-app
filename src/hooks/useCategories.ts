@@ -1,46 +1,45 @@
-﻿import { useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAsyncResource } from '@/hooks/useAsyncResource'
+import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 
 type Category = Database['public']['Tables']['categories']['Row']
 
 export function useCategories() {
   const { user } = useAuth()
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const cacheKey = user ? `categories:${user.id}` : undefined
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     if (!user) {
-      setCategories([])
-      setLoading(false)
-      return
+      return []
     }
 
-    setLoading(true)
-    const { data, error: nextError } = await supabase
+    const { data, error } = await supabase
       .from('categories')
       .select('*')
+      .or(`user_id.is.null,user_id.eq.${user.id}`)
       .order('is_default', { ascending: false })
       .order('name', { ascending: true })
 
-    if (nextError) {
-      setError(nextError.message)
-      setCategories([])
-    } else {
-      setError(null)
-      setCategories(data ?? [])
+    if (error) {
+      throw error
     }
 
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    void loadCategories()
+    return data ?? []
   }, [user?.id])
 
-  return { categories, loading, error, reload: loadCategories }
-}
+  const { data, error, loading, refreshing, hasLoaded, reload } = useAsyncResource({
+    enabled: Boolean(user),
+    initialData: [] as Category[],
+    load: loadCategories,
+    dependencies: [user?.id],
+    cacheKey,
+  })
 
+  return useMemo(
+    () => ({ categories: data, error, loading, refreshing, hasLoaded, reload }),
+    [data, error, hasLoaded, loading, refreshing, reload],
+  )
+}
