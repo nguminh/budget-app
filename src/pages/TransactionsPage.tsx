@@ -10,34 +10,35 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TransactionList } from '@/features/transactions/components/TransactionList'
+import { useDeleteTransaction } from '@/features/transactions/hooks/useTransactionMutations'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
 import { useTransactions } from '@/hooks/useTransactions'
-import { supabase } from '@/lib/supabase'
 
 export function TransactionsPage() {
   const { t } = useAppTranslation()
   const [typeFilter, setTypeFilter] = useState('all')
   const [monthFilter, setMonthFilter] = useState<'current' | 'all'>('all')
-  const { transactions, loading, refreshing, error, reload } = useTransactions({
+  const { transactions, error, isError, isFetching, isLoading } = useTransactions({
     type: typeFilter,
     currentMonthOnly: monthFilter === 'current',
   })
+  const deleteTransaction = useDeleteTransaction()
 
-  const statusLabel = error && transactions.length > 0 ? error : refreshing ? t('common.loading') : null
+  const statusLabel = error && transactions.length > 0 ? error : isFetching ? t('common.loading') : null
+  const showInitialLoading = isLoading && transactions.length === 0
+  const showEmpty = !showInitialLoading && !isError && transactions.length === 0
 
   const handleDelete = async (transactionId: string) => {
     if (!window.confirm(t('transactions.deleteConfirm'))) {
       return
     }
 
-    const { error: deleteError } = await supabase.from('transactions').delete().eq('id', transactionId)
-    if (deleteError) {
-      toast.error(deleteError.message)
-      return
+    try {
+      await deleteTransaction.mutateAsync(transactionId)
+      toast.success(t('transactions.successDelete'))
+    } catch (deleteError) {
+      toast.error(deleteError instanceof Error ? deleteError.message : t('transactions.loadError'))
     }
-
-    toast.success(t('transactions.successDelete'))
-    void reload()
   }
 
   return (
@@ -77,10 +78,11 @@ export function TransactionsPage() {
           </div>
         </CardContent>
       </Card>
-      {loading ? <LoadingState label={t('common.loading')} /> : null}
-      {!loading && error && transactions.length === 0 ? <ErrorState title={t('transactions.title')} description={error || t('transactions.loadError')} /> : null}
-      {!loading && !error && transactions.length === 0 ? <EmptyState title={t('transactions.empty')} description={t('transactions.subtitle')} /> : null}
-      {!loading && transactions.length > 0 ? <TransactionList transactions={transactions} onDelete={(id) => void handleDelete(id)} /> : null}
+      {showInitialLoading ? <LoadingState label={t('common.loading')} /> : null}
+      {!showInitialLoading && isError && transactions.length === 0 ? <ErrorState title={t('transactions.title')} description={error || t('transactions.loadError')} /> : null}
+      {showEmpty ? <EmptyState title={t('transactions.empty')} description={t('transactions.subtitle')} /> : null}
+      {!showInitialLoading && transactions.length > 0 ? <TransactionList transactions={transactions} onDelete={(id) => void handleDelete(id)} /> : null}
     </div>
   )
 }
+

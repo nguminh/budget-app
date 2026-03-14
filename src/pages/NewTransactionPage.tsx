@@ -1,21 +1,20 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { ErrorState } from '@/components/shared/ErrorState'
 import { LoadingState } from '@/components/shared/LoadingState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/features/auth/hooks/useAuth'
 import { TransactionForm } from '@/features/transactions/components/TransactionForm'
+import { useCreateTransaction } from '@/features/transactions/hooks/useTransactionMutations'
 import { useCategories } from '@/hooks/useCategories'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
-import { supabase } from '@/lib/supabase'
 
 export function NewTransactionPage() {
   const { t } = useAppTranslation()
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const { categories, loading, error } = useCategories()
+  const { categories, error, isLoading } = useCategories()
+  const createTransaction = useCreateTransaction()
   const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = async (values: {
@@ -26,40 +25,33 @@ export function NewTransactionPage() {
     note?: string
     transactionDate: string
   }) => {
-    if (!user) {
-      return
-    }
-
     const category = categories.find((item) => item.id === values.categoryId)
     if (!category) {
       return
     }
 
     setSubmitting(true)
-    const { error: insertError } = await supabase.from('transactions').insert({
-      user_id: user.id,
-      type: values.type,
-      amount: values.amount,
-      merchant: values.merchant,
-      category_id: category.id,
-      category_name: category.name,
-      note: values.note || null,
-      transaction_date: values.transactionDate,
-      currency: 'CAD',
-      source: 'manual',
-    })
-    setSubmitting(false)
 
-    if (insertError) {
-      toast.error(insertError.message)
-      return
+    try {
+      await createTransaction.mutateAsync({
+        amount: values.amount,
+        categoryId: category.id,
+        categoryName: category.name,
+        merchant: values.merchant,
+        note: values.note,
+        transactionDate: values.transactionDate,
+        type: values.type,
+      })
+      toast.success(t('transactions.successCreate'))
+      navigate('/transactions')
+    } catch (insertError) {
+      toast.error(insertError instanceof Error ? insertError.message : t('transactions.loadError'))
+    } finally {
+      setSubmitting(false)
     }
-
-    toast.success(t('transactions.successCreate'))
-    navigate('/transactions')
   }
 
-  if (loading) {
+  if (isLoading && categories.length === 0) {
     return <LoadingState label={t('common.loading')} />
   }
 

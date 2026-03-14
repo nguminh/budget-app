@@ -5,21 +5,21 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { LoadingState } from '@/components/shared/LoadingState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/features/auth/hooks/useAuth'
 import { BudgetForm } from '@/features/budgets/components/BudgetForm'
+import { useSaveBudget } from '@/features/budgets/hooks/useBudgetMutations'
 import { useBudget } from '@/hooks/useBudget'
 import { useTransactions } from '@/hooks/useTransactions'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
-import { formatCurrency, formatMonthInput, normalizeBudgetMonth } from '@/lib/utils'
-import { supabase } from '@/lib/supabase'
+import { formatCurrency, formatMonthInput } from '@/lib/utils'
 
 export function BudgetsPage() {
   const { t, i18n } = useAppTranslation()
-  const { user } = useAuth()
   const [month, setMonth] = useState(formatMonthInput())
   const [submitting, setSubmitting] = useState(false)
-  const { budget, loading, refreshing, error, reload } = useBudget(month)
-  const { transactions, loading: txLoading, refreshing: txRefreshing } = useTransactions({ month })
+  const saveBudget = useSaveBudget()
+  const { budget, error, isError, isFetched, isFetching, isLoading } = useBudget(month)
+  const transactionsQuery = useTransactions({ month })
+  const { transactions, isFetched: txFetched, isFetching: txFetching, isLoading: txLoading } = transactionsQuery
   const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA'
 
   const expenses = useMemo(
@@ -29,43 +29,31 @@ export function BudgetsPage() {
 
   const budgetAmount = budget ? Number(budget.amount) : 0
   const remaining = budgetAmount - expenses
+  const showInitialLoading = (!isFetched && isLoading) || (!txFetched && txLoading)
 
   const handleSubmit = async (values: { month: string; amount: number }) => {
-    if (!user) {
-      return
-    }
-
     setSubmitting(true)
-    const normalizedMonth = normalizeBudgetMonth(values.month)
 
-    const operation = budget
-      ? supabase.from('budgets').update({ amount: values.amount, period_month: normalizedMonth }).eq('id', budget.id)
-      : supabase.from('budgets').insert({
-          user_id: user.id,
-          period_month: normalizedMonth,
-          amount: values.amount,
-          currency: 'CAD',
-          category_id: null,
-        })
-
-    const { error: saveError } = await operation
-    setSubmitting(false)
-
-    if (saveError) {
-      toast.error(saveError.message)
-      return
+    try {
+      await saveBudget.mutateAsync({
+        amount: values.amount,
+        budgetId: budget?.id,
+        month: values.month,
+      })
+      setMonth(values.month)
+      toast.success(t('budgets.success'))
+    } catch (saveError) {
+      toast.error(saveError instanceof Error ? saveError.message : t('common.loading'))
+    } finally {
+      setSubmitting(false)
     }
-
-    setMonth(values.month)
-    toast.success(t('budgets.success'))
-    void reload()
   }
 
-  if (loading || txLoading) {
+  if (showInitialLoading) {
     return <LoadingState label={t('common.loading')} />
   }
 
-  if (error) {
+  if (isError && error) {
     return <ErrorState title={t('budgets.title')} description={error} />
   }
 
@@ -74,7 +62,7 @@ export function BudgetsPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t('budgets.current')}</CardTitle>
-          {refreshing || txRefreshing ? <p className="font-body text-xs uppercase tracking-[0.2em] text-ink/50">{t('common.loading')}</p> : null}
+          {isFetching || txFetching ? <p className="font-body text-xs uppercase tracking-[0.2em] text-ink/50">{t('common.loading')}</p> : null}
         </CardHeader>
         <CardContent>
           <BudgetForm initialValues={{ month, amount: budget ? Number(budget.amount) : 0 }} submitting={submitting} onSubmit={handleSubmit} />
@@ -110,3 +98,4 @@ export function BudgetsPage() {
     </div>
   )
 }
+

@@ -3,6 +3,7 @@ import type { Session, User } from '@supabase/supabase-js'
 
 import i18n from '@/i18n'
 import { LANGUAGE_STORAGE_KEY } from '@/lib/constants'
+import { queryClient } from '@/lib/queryClient'
 import { supabase, supabaseConfigError } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 
@@ -67,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false)
 
     if (!nextSession?.user || supabaseConfigError) {
+      queryClient.clear()
       setProfile(null)
       setProfileLoading(false)
       return
@@ -135,3 +137,4 @@ export function useAuth() {
   }
   return context
 }
+

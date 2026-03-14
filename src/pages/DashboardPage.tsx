@@ -1,5 +1,5 @@
+import { lazy, Suspense } from 'react'
 import { ArrowUpRight, PiggyBank, Receipt, TrendingDown, TrendingUp } from 'lucide-react'
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
@@ -7,42 +7,34 @@ import { LoadingState } from '@/components/shared/LoadingState'
 import { SummaryCard } from '@/components/shared/SummaryCard'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DashboardChartFallback } from '@/features/dashboard/components/ExpensesPieChart'
+import { useDashboardSummary } from '@/features/dashboard/hooks/useDashboardSummary'
 import { useBudget } from '@/hooks/useBudget'
 import { useTransactions } from '@/hooks/useTransactions'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
 import { formatCurrency, formatMonthInput } from '@/lib/utils'
 
-const COLORS = ['#1f6f5f', '#cb7c2c', '#b74f3b', '#6a8caf', '#92735f', '#8c5f7a']
+const ExpensesPieChart = lazy(async () => ({ default: (await import('@/features/dashboard/components/ExpensesPieChart')).ExpensesPieChart }))
 
 export function DashboardPage() {
   const month = formatMonthInput()
   const { t, i18n } = useAppTranslation()
-  const { transactions, loading, refreshing, error } = useTransactions({ currentMonthOnly: true })
+  const { transactions, error, isError, isFetching, isLoading } = useTransactions({ currentMonthOnly: true })
   const { budget } = useBudget(month)
   const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA'
+  const { budgetAmount, expenses, grouped, income, recent, remaining } = useDashboardSummary({
+    budget,
+    noCategoryLabel: t('common.noCategory'),
+    transactions,
+  })
 
-  if (loading) {
+  if (isLoading && transactions.length === 0) {
     return <LoadingState label={t('common.loading')} />
   }
 
-  if (error) {
+  if (isError && error) {
     return <ErrorState title={t('dashboard.title')} description={error} />
   }
-
-  const income = transactions.filter((item) => item.type === 'income').reduce((sum, item) => sum + Number(item.amount), 0)
-  const expenses = transactions.filter((item) => item.type === 'expense').reduce((sum, item) => sum + Number(item.amount), 0)
-  const budgetAmount = budget ? Number(budget.amount) : 0
-  const remaining = budgetAmount - expenses
-  const grouped = Object.values(
-    transactions
-      .filter((item) => item.type === 'expense')
-      .reduce<Record<string, { name: string; value: number }>>((acc, item) => {
-        const key = item.category_name || t('common.noCategory')
-        acc[key] = { name: key, value: (acc[key]?.value ?? 0) + Number(item.amount) }
-        return acc
-      }, {}),
-  )
-  const recent = transactions.slice(0, 5)
 
   return (
     <div className="space-y-6">
@@ -50,36 +42,15 @@ export function DashboardPage() {
         <SummaryCard title={t('dashboard.expenses')} value={formatCurrency(expenses, 'CAD', locale)} description={t('dashboard.subtitle')} icon={TrendingDown} tone="warning" />
         <SummaryCard title={t('dashboard.income')} value={formatCurrency(income, 'CAD', locale)} description={t('dashboard.subtitle')} icon={TrendingUp} tone="success" />
         <SummaryCard title={t('dashboard.remaining')} value={formatCurrency(remaining, 'CAD', locale)} description={budget ? t('dashboard.ofBudget') : t('dashboard.budgetMissing')} icon={PiggyBank} />
-        <SummaryCard title={t('dashboard.count')} value={String(transactions.length)} description={refreshing ? t('common.loading') : t('dashboard.subtitle')} icon={Receipt} />
+        <SummaryCard title={t('dashboard.count')} value={String(transactions.length)} description={isFetching ? t('common.loading') : t('dashboard.subtitle')} icon={Receipt} />
       </section>
       {transactions.length === 0 ? (
         <EmptyState title={t('dashboard.empty')} description={t('dashboard.emptyHint')} />
       ) : (
         <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('dashboard.chartTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[320px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={grouped} dataKey="value" nameKey="name" innerRadius={70} outerRadius={110} paddingAngle={3}>
-                    {grouped.map((entry, index) => (
-                      <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: number) => formatCurrency(value, 'CAD', locale)} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {grouped.map((entry, index) => (
-                  <Badge key={entry.name} style={{ backgroundColor: `${COLORS[index % COLORS.length]}20`, color: COLORS[index % COLORS.length] }}>
-                    {entry.name}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <Suspense fallback={<DashboardChartFallback />}>
+            <ExpensesPieChart data={grouped} locale={locale} title={t('dashboard.chartTitle')} />
+          </Suspense>
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -128,3 +99,4 @@ export function DashboardPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -6,66 +6,24 @@ import { ErrorState } from '@/components/shared/ErrorState'
 import { LoadingState } from '@/components/shared/LoadingState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TransactionForm } from '@/features/transactions/components/TransactionForm'
+import { useDeleteTransaction, useUpdateTransaction } from '@/features/transactions/hooks/useTransactionMutations'
 import { useCategories } from '@/hooks/useCategories'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
-import { supabase } from '@/lib/supabase'
-import type { Database } from '@/types/database'
-
-type Transaction = Database['public']['Tables']['transactions']['Row']
+import { useTransaction } from '@/hooks/useTransaction'
 
 export function EditTransactionPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t } = useAppTranslation()
-  const { categories, loading: categoriesLoading, error: categoriesError } = useCategories()
-  const [transaction, setTransaction] = useState<Transaction | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { categories, error: categoriesError, isLoading: categoriesLoading } = useCategories()
+  const { transaction, error, isLoading } = useTransaction(id)
+  const updateTransaction = useUpdateTransaction(id ?? '')
+  const deleteTransaction = useDeleteTransaction()
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let active = true
-
-    async function loadTransaction() {
-      if (!id) {
-        setError('Missing transaction id.')
-        setLoading(false)
-        return
-      }
-
-      try {
-        const { data, error: fetchError } = await supabase.from('transactions').select('*').eq('id', id).maybeSingle()
-
-        if (!active) {
-          return
-        }
-
-        if (fetchError) {
-          setError(fetchError.message)
-          return
-        }
-
-        setError(null)
-        setTransaction(data ?? null)
-      } catch (nextError) {
-        if (!active) {
-          return
-        }
-
-        setError(nextError instanceof Error ? nextError.message : 'Unable to load this transaction right now.')
-      } finally {
-        if (active) {
-          setLoading(false)
-        }
-      }
-    }
-
-    void loadTransaction()
-
-    return () => {
-      active = false
-    }
-  }, [id])
+  if (!id) {
+    return <ErrorState title={t('transactions.editTitle')} description="Missing transaction id." />
+  }
 
   const handleSubmit = async (values: {
     type: 'expense' | 'income'
@@ -85,27 +43,24 @@ export function EditTransactionPage() {
     }
 
     setSubmitting(true)
-    const { error: updateError } = await supabase
-      .from('transactions')
-      .update({
-        type: values.type,
+
+    try {
+      await updateTransaction.mutateAsync({
         amount: values.amount,
+        categoryId: category.id,
+        categoryName: category.name,
         merchant: values.merchant,
-        category_id: category.id,
-        category_name: category.name,
-        note: values.note || null,
-        transaction_date: values.transactionDate,
+        note: values.note,
+        transactionDate: values.transactionDate,
+        type: values.type,
       })
-      .eq('id', transaction.id)
-    setSubmitting(false)
-
-    if (updateError) {
-      toast.error(updateError.message)
-      return
+      toast.success(t('transactions.successUpdate'))
+      navigate('/transactions')
+    } catch (updateError) {
+      toast.error(updateError instanceof Error ? updateError.message : t('transactions.loadError'))
+    } finally {
+      setSubmitting(false)
     }
-
-    toast.success(t('transactions.successUpdate'))
-    navigate('/transactions')
   }
 
   const handleDelete = async () => {
@@ -113,17 +68,18 @@ export function EditTransactionPage() {
       return
     }
 
-    const { error: deleteError } = await supabase.from('transactions').delete().eq('id', transaction.id)
-    if (deleteError) {
-      toast.error(deleteError.message)
-      return
+    try {
+      await deleteTransaction.mutateAsync(transaction.id)
+      toast.success(t('transactions.successDelete'))
+      navigate('/transactions')
+    } catch (deleteError) {
+      toast.error(deleteError instanceof Error ? deleteError.message : t('transactions.loadError'))
     }
-
-    toast.success(t('transactions.successDelete'))
-    navigate('/transactions')
   }
 
-  if (loading || categoriesLoading) {
+  const showInitialLoading = (isLoading && !transaction) || (categoriesLoading && categories.length === 0)
+
+  if (showInitialLoading) {
     return <LoadingState label={t('common.loading')} />
   }
 
@@ -156,3 +112,4 @@ export function EditTransactionPage() {
     </Card>
   )
 }
+
