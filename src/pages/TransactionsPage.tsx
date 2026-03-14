@@ -115,3 +115,6 @@ export function TransactionsPage() {
     </div>
   )
 }
+
+export default TransactionsPage
+

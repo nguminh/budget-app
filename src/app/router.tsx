@@ -6,13 +6,13 @@ import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/shared/LoadingState'
 import { ProtectedRoute, PublicOnlyRoute } from '@/components/shared/ProtectedRoute'
 
-const DashboardPage = lazy(async () => ({ default: (await import('@/pages/DashboardPage')).DashboardPage }))
-const TransactionsPage = lazy(async () => ({ default: (await import('@/pages/TransactionsPage')).TransactionsPage }))
-const NewTransactionPage = lazy(async () => ({ default: (await import('@/pages/NewTransactionPage')).NewTransactionPage }))
-const EditTransactionPage = lazy(async () => ({ default: (await import('@/pages/EditTransactionPage')).EditTransactionPage }))
-const BudgetsPage = lazy(async () => ({ default: (await import('@/pages/BudgetsPage')).BudgetsPage }))
-const SettingsPage = lazy(async () => ({ default: (await import('@/pages/SettingsPage')).SettingsPage }))
-const LoginPage = lazy(async () => ({ default: (await import('@/pages/LoginPage')).LoginPage }))
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
+const TransactionsPage = lazy(() => import('@/pages/TransactionsPage'))
+const NewTransactionPage = lazy(() => import('@/pages/NewTransactionPage'))
+const EditTransactionPage = lazy(() => import('@/pages/EditTransactionPage'))
+const BudgetsPage = lazy(() => import('@/pages/BudgetsPage'))
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
+const LoginPage = lazy(() => import('@/pages/LoginPage'))
 
 function renderLazyPage(Component: LazyExoticComponent<ComponentType>) {
   return (
@@ -54,4 +54,3 @@ export const router = createBrowserRouter([
     ],
   },
 ])
-

@@ -67,3 +67,5 @@ export function ExpensesPieChart({
   )
 }
 
+export default ExpensesPieChart
+

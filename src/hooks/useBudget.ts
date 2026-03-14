@@ -15,10 +15,9 @@ export function useBudget(month: string) {
 
   const query = useQuery({
     enabled: Boolean(user),
-    placeholderData: (previousData) => previousData,
     queryFn: async () => {
       if (!user) {
-        return null as Budget | null
+        return [] as Budget[]
       }
 
       const { data, error } = await supabase
@@ -26,23 +25,24 @@ export function useBudget(month: string) {
         .select('*')
         .eq('user_id', user.id)
         .eq('period_month', normalizedMonth)
-        .is('category_id', null)
-        .maybeSingle()
 
       if (error) {
         throw error
       }
 
-      return (data ?? null) as Budget | null
+      return (data ?? []) as Budget[]
     },
     queryKey: user ? queryKeys.budgets.month(user.id, normalizedMonth) : (['budgets', 'anonymous', normalizedMonth] as const),
     staleTime: 60_000,
   })
 
+  const budgets = query.data ?? ([] as Budget[])
+
   return {
     ...query,
-    budget: query.data,
+    budget: budgets.find((entry) => entry.category_id === null) ?? null,
+    budgets,
+    categoryBudgets: budgets.filter((entry) => entry.category_id !== null),
     error: query.error ? getQueryErrorMessage(query.error) : null,
   }
 }
-

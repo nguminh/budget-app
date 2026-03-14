@@ -71,3 +71,5 @@ export function NewTransactionPage() {
   )
 }
 
+export default NewTransactionPage
+

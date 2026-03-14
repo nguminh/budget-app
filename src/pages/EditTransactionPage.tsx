@@ -113,3 +113,5 @@ export function EditTransactionPage() {
   )
 }
 
+export default EditTransactionPage
+

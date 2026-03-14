@@ -1,4 +1,4 @@
-﻿import { Wallet2 } from 'lucide-react'
+import { Wallet2 } from 'lucide-react'
 
 import { AuthForm } from '@/features/auth/components/AuthForm'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
@@ -40,4 +40,6 @@ export function LoginPage() {
     </div>
   )
 }
+
+export default LoginPage
 

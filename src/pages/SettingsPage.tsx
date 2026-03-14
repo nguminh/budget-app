@@ -1,4 +1,4 @@
-﻿import { Crown, LogOut } from 'lucide-react'
+import { Crown, LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -71,4 +71,6 @@ export function SettingsPage() {
     </div>
   )
 }
+
+export default SettingsPage
 
