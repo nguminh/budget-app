@@ -1,120 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useState } from 'react'
 import './App.css'
+import { BottomNav } from './components/layout/BottomNav.jsx'
+import { TopHeader } from './components/layout/TopHeader.jsx'
+import { AnalysisPage } from './pages/AnalysisPage.jsx'
+import { HomePage } from './pages/HomePage.jsx'
+import { OnboardingPage } from './pages/OnboardingPage.jsx'
+import { SettingsPage } from './pages/SettingsPage.jsx'
+import { TransactionsPage } from './pages/TransactionsPage.jsx'
+
+const ONBOARDING_STORAGE_KEY = 'budget-app-onboarding-complete'
+
+const pageMeta = {
+  home: { title: "Alex's Finances", eyebrow: 'Welcome Back' },
+  transactions: { title: 'Transactions', eyebrow: 'Search And Sort' },
+  analysis: { title: 'Spending Analysis', eyebrow: 'Budget Intelligence' },
+  settings: { title: 'Preferences', eyebrow: 'Control Center' },
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
+    return window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true'
+  })
+  const [activePage, setActivePage] = useState(() =>
+    window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true'
+      ? 'home'
+      : 'onboarding',
+  )
+
+  useEffect(() => {
+    if (hasCompletedOnboarding) {
+      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true')
+    }
+  }, [hasCompletedOnboarding])
+
+  const handleCompleteOnboarding = () => {
+    setHasCompletedOnboarding(true)
+    setActivePage('home')
+  }
+
+  const handleResetOnboarding = () => {
+    window.localStorage.removeItem(ONBOARDING_STORAGE_KEY)
+    setHasCompletedOnboarding(false)
+    setActivePage('onboarding')
+  }
+
+  const renderPage = () => {
+    switch (activePage) {
+      case 'transactions':
+        return <TransactionsPage />
+      case 'analysis':
+        return <AnalysisPage />
+      case 'settings':
+        return <SettingsPage onResetOnboarding={handleResetOnboarding} />
+      case 'home':
+      default:
+        return <HomePage />
+    }
+  }
+
+  if (!hasCompletedOnboarding) {
+    return <OnboardingPage onComplete={handleCompleteOnboarding} />
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <div className="app-shell">
+      <TopHeader
+        eyebrow={pageMeta[activePage].eyebrow}
+        title={pageMeta[activePage].title}
+        profileInitials="AS"
+      />
+      <main className="page-content">{renderPage()}</main>
+      <BottomNav activePage={activePage} onNavigate={setActivePage} />
+    </div>
   )
 }
 

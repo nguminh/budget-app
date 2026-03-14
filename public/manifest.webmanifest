@@ -1,0 +1,17 @@
+{
+  "name": "Budget App",
+  "short_name": "Budget",
+  "description": "A mobile-friendly budgeting app shell with onboarding, analysis, and transactions.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#edf3fa",
+  "theme_color": "#101b2d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
