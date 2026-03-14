@@ -7,14 +7,14 @@ import { LoadingState } from '@/components/shared/LoadingState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { TransactionForm } from '@/features/transactions/components/TransactionForm'
+import { createTransactionFromForm } from '@/features/transactions/lib/transactionWriteClient'
 import { useCategories } from '@/hooks/useCategories'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
-import { supabase } from '@/lib/supabase'
 
 export function NewTransactionPage() {
   const { t } = useAppTranslation()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { categories, loading, error } = useCategories()
   const [submitting, setSubmitting] = useState(false)
 
@@ -30,33 +30,17 @@ export function NewTransactionPage() {
       return
     }
 
-    const category = categories.find((item) => item.id === values.categoryId)
-    if (!category) {
-      return
-    }
-
     setSubmitting(true)
-    const { error: insertError } = await supabase.from('transactions').insert({
-      user_id: user.id,
-      type: values.type,
-      amount: values.amount,
-      merchant: values.merchant,
-      category_id: category.id,
-      category_name: category.name,
-      note: values.note || null,
-      transaction_date: values.transactionDate,
-      currency: 'CAD',
-      source: 'manual',
-    })
-    setSubmitting(false)
 
-    if (insertError) {
-      toast.error(insertError.message)
-      return
+    try {
+      await createTransactionFromForm(user.id, categories, values, profile?.default_currency ?? 'CAD')
+      toast.success(t('transactions.successCreate'))
+      navigate('/transactions')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('auth.errorGeneric'))
+    } finally {
+      setSubmitting(false)
     }
-
-    toast.success(t('transactions.successCreate'))
-    navigate('/transactions')
   }
 
   if (loading) {
@@ -78,4 +62,3 @@ export function NewTransactionPage() {
     </Card>
   )
 }
-

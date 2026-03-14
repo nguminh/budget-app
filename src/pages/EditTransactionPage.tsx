@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -6,6 +6,7 @@ import { ErrorState } from '@/components/shared/ErrorState'
 import { LoadingState } from '@/components/shared/LoadingState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TransactionForm } from '@/features/transactions/components/TransactionForm'
+import { deleteTransaction, updateTransaction } from '@/features/transactions/lib/transactionWriteClient'
 import { useCategories } from '@/hooks/useCategories'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
 import { supabase } from '@/lib/supabase'
@@ -79,33 +80,17 @@ export function EditTransactionPage() {
       return
     }
 
-    const category = categories.find((item) => item.id === values.categoryId)
-    if (!category) {
-      return
-    }
-
     setSubmitting(true)
-    const { error: updateError } = await supabase
-      .from('transactions')
-      .update({
-        type: values.type,
-        amount: values.amount,
-        merchant: values.merchant,
-        category_id: category.id,
-        category_name: category.name,
-        note: values.note || null,
-        transaction_date: values.transactionDate,
-      })
-      .eq('id', transaction.id)
-    setSubmitting(false)
 
-    if (updateError) {
-      toast.error(updateError.message)
-      return
+    try {
+      await updateTransaction(transaction.id, categories, values)
+      toast.success(t('transactions.successUpdate'))
+      navigate('/transactions')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('auth.errorGeneric'))
+    } finally {
+      setSubmitting(false)
     }
-
-    toast.success(t('transactions.successUpdate'))
-    navigate('/transactions')
   }
 
   const handleDelete = async () => {
@@ -113,14 +98,13 @@ export function EditTransactionPage() {
       return
     }
 
-    const { error: deleteError } = await supabase.from('transactions').delete().eq('id', transaction.id)
-    if (deleteError) {
-      toast.error(deleteError.message)
-      return
+    try {
+      await deleteTransaction(transaction.id)
+      toast.success(t('transactions.successDelete'))
+      navigate('/transactions')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('auth.errorGeneric'))
     }
-
-    toast.success(t('transactions.successDelete'))
-    navigate('/transactions')
   }
 
   if (loading || categoriesLoading) {

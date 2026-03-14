@@ -10,6 +10,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { NewTransactionPage } from '@/pages/NewTransactionPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { TransactionsPage } from '@/pages/TransactionsPage'
+import { AiTransactionPage } from '@/pages/AiTransactionPage'
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,14 @@ export const router = createBrowserRouter([
           <PublicOnlyRoute>
             <LoginPage />
           </PublicOnlyRoute>
+        ),
+      },
+      {
+        path: 'transactions/ai',
+        element: (
+          <ProtectedRoute>
+            <AiTransactionPage />
+          </ProtectedRoute>
         ),
       },
       {
@@ -43,4 +52,3 @@ export const router = createBrowserRouter([
     ],
   },
 ])
-

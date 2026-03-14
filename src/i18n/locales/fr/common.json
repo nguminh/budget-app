@@ -67,7 +67,45 @@
     "successCreate": "Transaction ajoutée.",
     "successUpdate": "Transaction mise à jour.",
     "successDelete": "Transaction supprimée.",
-    "loadError": "Impossible de charger vos transactions pour le moment."
+    "loadError": "Impossible de charger vos transactions pour le moment.",
+    "ai": {
+      "launch": "Mode IA",
+      "title": "Capture de transactions par IA",
+      "kicker": "Pipeline reçus et voix",
+      "subtitle": "Téléversez un reçu ou décrivez une transaction à voix haute. Maple Ledger la transforme en candidate structurée et la garde ici jusqu'à votre approbation.",
+      "manualFallback": "Utiliser le formulaire manuel",
+      "captureTitle": "Capturer une entrée",
+      "captureSubtitle": "Choisissez une photo ou la voix. Chaque analyse réussie arrive dans la file de révision à droite.",
+      "ready": "Prêt",
+      "photoMode": "Photo",
+      "photoHint": "Compresse, téléverse et analyse un reçu ou une photo d'achat à la fois.",
+      "voiceMode": "Voix",
+      "voiceHint": "Parlez naturellement, comme « J'ai dépensé 500 chez Zara aujourd'hui ».",
+      "photoTitle": "Téléversement de reçu ou photo",
+      "photoDescription": "Utilisez ceci pour les reçus, factures ou photos simples d'achat. Les images sont compressées dans le navigateur avant l'analyse.",
+      "uploadReceipt": "Téléverser une photo",
+      "voiceTitle": "Capture vocale",
+      "voiceDescription": "Enregistrez une courte phrase sur la transaction. L'audio est téléversé, transcrit, analysé puis ajouté à la même file.",
+      "startRecording": "Commencer l'enregistrement",
+      "stopRecording": "Arrêter l'enregistrement",
+      "voiceUnsupported": "Capture vocale indisponible",
+      "recording": "Enregistrement en cours",
+      "pipelineTitle": "Réviser avant l'écriture",
+      "pipelineDescription": "Rien n'est inséré automatiquement. Chaque résultat IA devient d'abord une carte candidate, pour que vous puissiez l'approuver ou la retirer avant qu'il devienne une vraie transaction.",
+      "queueTitle": "File des candidates",
+      "queueSubtitle": "Approuvez les éléments pour les écrire dans les transactions, ou retirez ceux qui semblent incorrects.",
+      "emptyTitle": "Aucune candidate pour le moment",
+      "emptyDescription": "Téléversez une photo ou enregistrez une note vocale pour commencer votre file de révision.",
+      "approve": "Approuver et ajouter",
+      "remove": "Retirer",
+      "processingReceipt": "Analyse de la photo...",
+      "processingVoice": "Transcription et analyse de la voix...",
+      "addedToQueue": "Candidate ajoutée à la file.",
+      "voicePermissionError": "Impossible d'accéder au microphone.",
+      "sourceReceipt": "Reçu",
+      "sourceVoice": "Voix",
+      "sourceManual": "Manuel"
+    }
   },
   "budgets": {
     "title": "Budgets",
@@ -117,4 +155,3 @@
     "noteMax": "Gardez la note sous 280 caractères."
   }
 }
-

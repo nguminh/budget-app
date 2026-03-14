@@ -67,7 +67,45 @@
     "successCreate": "Transaction added.",
     "successUpdate": "Transaction updated.",
     "successDelete": "Transaction deleted.",
-    "loadError": "We couldn't load your transactions right now."
+    "loadError": "We couldn't load your transactions right now.",
+    "ai": {
+      "launch": "AI add mode",
+      "title": "AI transaction capture",
+      "kicker": "Receipt and voice pipeline",
+      "subtitle": "Upload a receipt or speak a transaction out loud. Maple Ledger will turn it into a structured candidate and hold it here until you approve it.",
+      "manualFallback": "Use manual form",
+      "captureTitle": "Capture input",
+      "captureSubtitle": "Choose a photo or voice pass. Every successful parse lands in the review queue on the right.",
+      "ready": "Ready",
+      "photoMode": "Photo",
+      "photoHint": "Compress, upload, and parse one receipt or purchase photo at a time.",
+      "voiceMode": "Voice",
+      "voiceHint": "Speak naturally, like “I spent 500 on clothes at Zara today.”",
+      "photoTitle": "Receipt and photo upload",
+      "photoDescription": "Use this for receipts, invoices, or simple purchase photos. Images are compressed in the browser before they go to the parser.",
+      "uploadReceipt": "Upload photo",
+      "voiceTitle": "Voice capture",
+      "voiceDescription": "Record a short statement about the transaction. Audio is uploaded, transcribed, parsed, and added to the same queue.",
+      "startRecording": "Start recording",
+      "stopRecording": "Stop recording",
+      "voiceUnsupported": "Voice capture unavailable",
+      "recording": "Recording in progress",
+      "pipelineTitle": "Review before write",
+      "pipelineDescription": "Nothing gets inserted automatically. Each AI result becomes a candidate stripe first, so you can approve it or remove it before it becomes a real transaction.",
+      "queueTitle": "Candidate queue",
+      "queueSubtitle": "Approve items to write them into transactions, or remove anything that looks off.",
+      "emptyTitle": "No candidates yet",
+      "emptyDescription": "Upload a photo or record a voice note to start building your review queue.",
+      "approve": "Approve and add",
+      "remove": "Remove",
+      "processingReceipt": "Analyzing photo...",
+      "processingVoice": "Transcribing and parsing voice...",
+      "addedToQueue": "Candidate added to queue.",
+      "voicePermissionError": "We couldn't access the microphone.",
+      "sourceReceipt": "Receipt",
+      "sourceVoice": "Voice",
+      "sourceManual": "Manual"
+    }
   },
   "budgets": {
     "title": "Budgets",
@@ -117,4 +155,3 @@
     "noteMax": "Keep the note under 280 characters."
   }
 }
-

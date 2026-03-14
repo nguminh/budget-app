@@ -46,7 +46,7 @@ create table if not exists public.transactions (
   category_name text not null,
   note text,
   transaction_date date not null,
-  source text not null default 'manual' check (source in ('manual')),
+  source text not null default 'manual' check (source in ('manual', 'receipt', 'voice')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -158,6 +158,45 @@ alter table public.profiles enable row level security;
 alter table public.categories enable row level security;
 alter table public.transactions enable row level security;
 alter table public.budgets enable row level security;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'transaction-ingestion',
+  'transaction-ingestion',
+  false,
+  10485760,
+  array['image/jpeg', 'image/png', 'image/webp', 'audio/webm', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg']
+)
+on conflict (id) do nothing;
+
+drop policy if exists "transaction-ingestion-upload-own" on storage.objects;
+create policy "transaction-ingestion-upload-own"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'transaction-ingestion'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "transaction-ingestion-read-own" on storage.objects;
+create policy "transaction-ingestion-read-own"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'transaction-ingestion'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "transaction-ingestion-delete-own" on storage.objects;
+create policy "transaction-ingestion-delete-own"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'transaction-ingestion'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
 
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own"
@@ -290,4 +329,5 @@ values
   ('Gift', 'income', '#ec4899', true),
   ('Other', 'income', '#6b7280', true)
 on conflict do nothing;
+
 

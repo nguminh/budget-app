@@ -53,7 +53,7 @@
           category_name: string
           note: string | null
           transaction_date: string
-          source: 'manual'
+          source: 'manual' | 'receipt' | 'voice'
           created_at: string
           updated_at: string
         }
@@ -68,7 +68,7 @@
           category_name: string
           note?: string | null
           transaction_date: string
-          source?: 'manual'
+          source?: 'manual' | 'receipt' | 'voice'
         }
         Update: Partial<Database['public']['Tables']['transactions']['Insert']>
       }
@@ -96,4 +96,3 @@
     }
   }
 }
-

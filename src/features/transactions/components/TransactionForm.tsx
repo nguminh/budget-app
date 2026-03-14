@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
+import { getLocalDateInputValue } from '@/lib/utils'
 import { buildTransactionSchema } from '@/lib/validations/transaction'
 import type { Database } from '@/types/database'
 
@@ -47,7 +48,7 @@ export function TransactionForm({
       merchant: initialValues?.merchant ?? '',
       categoryId: initialValues?.categoryId ?? '',
       note: initialValues?.note ?? '',
-      transactionDate: initialValues?.transactionDate ?? new Date().toISOString().slice(0, 10),
+      transactionDate: initialValues?.transactionDate ?? getLocalDateInputValue(),
     },
   })
 
@@ -120,4 +121,3 @@ export function TransactionForm({
     </form>
   )
 }
-

@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+﻿import { Plus, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TransactionList } from '@/features/transactions/components/TransactionList'
+import { deleteTransaction } from '@/features/transactions/lib/transactionWriteClient'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
 import { useTransactions } from '@/hooks/useTransactions'
-import { supabase } from '@/lib/supabase'
 
 export function TransactionsPage() {
   const { t } = useAppTranslation()
@@ -30,14 +30,13 @@ export function TransactionsPage() {
       return
     }
 
-    const { error: deleteError } = await supabase.from('transactions').delete().eq('id', transactionId)
-    if (deleteError) {
-      toast.error(deleteError.message)
-      return
+    try {
+      await deleteTransaction(transactionId)
+      toast.success(t('transactions.successDelete'))
+      void reload()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('auth.errorGeneric'))
     }
-
-    toast.success(t('transactions.successDelete'))
-    void reload()
   }
 
   return (
@@ -49,9 +48,14 @@ export function TransactionsPage() {
             <p className="font-body text-sm text-ink/70">{t('transactions.subtitle')}</p>
             {statusLabel ? <p className="mt-2 font-body text-xs uppercase tracking-[0.2em] text-ink/50">{statusLabel}</p> : null}
           </div>
-          <Button asChild>
-            <Link to="/transactions/new"><Plus className="size-4" />{t('transactions.add')}</Link>
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild variant="outline">
+              <Link to="/transactions/ai"><Sparkles className="size-4" />{t('transactions.ai.launch')}</Link>
+            </Button>
+            <Button asChild>
+              <Link to="/transactions/new"><Plus className="size-4" />{t('transactions.add')}</Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
