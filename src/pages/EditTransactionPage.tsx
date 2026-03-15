@@ -32,6 +32,7 @@ export function EditTransactionPage() {
     categoryId: string
     note?: string
     transactionDate: string
+    transactionTime: string
   }) => {
     if (!transaction) {
       return
@@ -52,6 +53,7 @@ export function EditTransactionPage() {
         merchant: values.merchant,
         note: values.note,
         transactionDate: values.transactionDate,
+        transactionTime: values.transactionTime,
         type: values.type,
       })
       toast.success(t('transactions.successUpdate'))
@@ -102,6 +104,7 @@ export function EditTransactionPage() {
             categoryId: transaction.category_id ?? '',
             note: transaction.note ?? '',
             transactionDate: transaction.transaction_date,
+            transactionTime: transaction.transaction_time?.slice(0, 5) ?? '12:00',
           }}
           submitting={submitting}
           submitLabel={t('transactions.save')}
@@ -114,4 +117,3 @@ export function EditTransactionPage() {
 }
 
 export default EditTransactionPage
-

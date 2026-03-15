@@ -8,6 +8,7 @@ type TransactionStub = {
   amount: number
   id: string
   transaction_date: string
+  transaction_time: string
   type: 'expense' | 'income'
 }
 
@@ -76,7 +77,7 @@ describe('useTransactions', () => {
     )
 
     act(() => {
-      resolveAll?.([{ amount: 25, id: 'txn-1', transaction_date: '2026-03-01', type: 'expense' }])
+      resolveAll?.([{ amount: 25, id: 'txn-1', transaction_date: '2026-03-01', transaction_time: '08:30:00', type: 'expense' }])
     })
 
     await waitFor(() => {
@@ -103,4 +104,3 @@ describe('useTransactions', () => {
     })
   })
 })
-

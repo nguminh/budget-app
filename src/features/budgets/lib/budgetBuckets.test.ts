@@ -78,10 +78,10 @@ describe('budget bucket tracking', () => {
         { amount: 90, category_id: 'other-id', created_at: '', currency: 'CAD', id: '6', period_month: '2026-03-01', updated_at: '', user_id: 'user-1' },
       ],
       transactions: [
-        { amount: 80, category_id: null, category_name: 'Dining', created_at: '', currency: 'CAD', id: 'tx-1', merchant: 'Cafe', note: null, source: 'manual', transaction_date: '2026-03-12', type: 'expense', updated_at: '', user_id: 'user-1' },
-        { amount: 60, category_id: null, category_name: 'Shopping', created_at: '', currency: 'CAD', id: 'tx-2', merchant: 'Store', note: null, source: 'manual', transaction_date: '2026-03-13', type: 'expense', updated_at: '', user_id: 'user-1' },
-        { amount: 45, category_id: null, category_name: 'Health', created_at: '', currency: 'CAD', id: 'tx-3', merchant: 'Clinic', note: null, source: 'manual', transaction_date: '2026-03-14', type: 'expense', updated_at: '', user_id: 'user-1' },
-        { amount: 110, category_id: null, category_name: 'Transport', created_at: '', currency: 'CAD', id: 'tx-4', merchant: 'Transit', note: null, source: 'manual', transaction_date: '2026-03-15', type: 'expense', updated_at: '', user_id: 'user-1' },
+        { amount: 80, category_id: null, category_name: 'Dining', created_at: '', currency: 'CAD', id: 'tx-1', merchant: 'Cafe', note: null, source: 'manual', transaction_date: '2026-03-12', transaction_time: '08:00:00', type: 'expense', updated_at: '', user_id: 'user-1' },
+        { amount: 60, category_id: null, category_name: 'Shopping', created_at: '', currency: 'CAD', id: 'tx-2', merchant: 'Store', note: null, source: 'manual', transaction_date: '2026-03-13', transaction_time: '09:00:00', type: 'expense', updated_at: '', user_id: 'user-1' },
+        { amount: 45, category_id: null, category_name: 'Health', created_at: '', currency: 'CAD', id: 'tx-3', merchant: 'Clinic', note: null, source: 'manual', transaction_date: '2026-03-14', transaction_time: '10:00:00', type: 'expense', updated_at: '', user_id: 'user-1' },
+        { amount: 110, category_id: null, category_name: 'Transport', created_at: '', currency: 'CAD', id: 'tx-4', merchant: 'Transit', note: null, source: 'manual', transaction_date: '2026-03-15', transaction_time: '11:00:00', type: 'expense', updated_at: '', user_id: 'user-1' },
       ],
     })
 

@@ -67,7 +67,9 @@
     "successCreate": "Transaction ajout�e.",
     "successUpdate": "Transaction mise � jour.",
     "successDelete": "Transaction supprim�e.",
-    "loadError": "Impossible de charger vos transactions pour le moment."
+    "loadError": "Impossible de charger vos transactions pour le moment.",
+    "searchPlaceholder": "Rechercher un marchand, une categorie ou un type",
+    "time": "Heure"
   },
   "budgets": {
     "title": "Budgets",
@@ -124,6 +126,7 @@
     "categoryRequired": "Choisissez une cat�gorie.",
     "dateRequired": "Choisissez une date.",
     "monthRequired": "Choisissez un mois.",
-    "noteMax": "Gardez la note sous 280 caract�res."
+    "noteMax": "Gardez la note sous 280 caract�res.",
+    "timeRequired": "Choisissez une heure."
   }
 }

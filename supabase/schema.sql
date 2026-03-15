@@ -1,4 +1,4 @@
-﻿create extension if not exists pgcrypto;
+create extension if not exists pgcrypto;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -46,10 +46,14 @@ create table if not exists public.transactions (
   category_name text not null,
   note text,
   transaction_date date not null,
+  transaction_time time not null default '12:00:00',
   source text not null default 'manual' check (source in ('manual')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.transactions
+  add column if not exists transaction_time time not null default '12:00:00';
 
 create table if not exists public.budgets (
   id uuid primary key default gen_random_uuid(),
@@ -290,4 +294,3 @@ values
   ('Gift', 'income', '#ec4899', true),
   ('Other', 'income', '#6b7280', true)
 on conflict do nothing;
-

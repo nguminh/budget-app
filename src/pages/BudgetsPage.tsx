@@ -76,25 +76,25 @@ export function BudgetsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {!budget && categoryBudgets.length === 0 ? <EmptyState title={t('budgets.empty')} description={t('dashboard.budgetMissing')} /> : null}
-      <Card>
-        <CardHeader className="space-y-4">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+      <Card className="rounded-[20px]">
+        <CardHeader className="gap-3 p-4 pb-0 md:p-5 md:pb-0">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle>{t('budgets.current')}</CardTitle>
-              {isFetching || txFetching ? <p className="mt-2 font-body text-xs uppercase tracking-[0.2em] text-ink/50">{t('common.loading')}</p> : null}
+              {isFetching || txFetching ? <p className="mt-1 font-body text-xs uppercase tracking-[0.2em] text-ink/50">{t('common.loading')}</p> : null}
             </div>
-            <div className="flex items-end gap-6">
-              <p className="text-2xl font-semibold">{formatCurrency(expenses, 'CAD', locale)}</p>
-              <p className="text-2xl font-semibold text-ink/60">{formatCurrency(remaining, 'CAD', locale)}</p>
+            <div className="text-right">
+              <p className="text-2xl font-semibold">{formatCurrency(remaining, 'CAD', locale)}</p>
+              <p className="mt-0.5 font-body text-xs uppercase tracking-[0.18em] text-ink/50">{t('dashboard.budgetLeft')}</p>
             </div>
           </div>
-          <div className="h-3 overflow-hidden rounded-full bg-muted">
+          <div className="h-2.5 overflow-hidden rounded-full bg-muted">
             <div className="h-full rounded-full bg-accent" style={{ width: `${progressPercent}%` }} />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-3 md:p-5 md:pt-4">
           <BudgetForm
             categories={budgetBuckets.map((bucket) => ({ color: bucket.color, id: bucket.categoryId, name: bucket.label }))}
             initialValues={initialValues}

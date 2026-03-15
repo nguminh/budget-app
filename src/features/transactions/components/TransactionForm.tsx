@@ -1,4 +1,4 @@
-﻿import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -20,6 +20,11 @@ type TransactionValues = {
   categoryId: string
   note?: string
   transactionDate: string
+  transactionTime: string
+}
+
+function getCurrentTimeInputValue() {
+  return new Date().toTimeString().slice(0, 5)
 }
 
 export function TransactionForm({
@@ -48,6 +53,7 @@ export function TransactionForm({
       categoryId: initialValues?.categoryId ?? '',
       note: initialValues?.note ?? '',
       transactionDate: initialValues?.transactionDate ?? new Date().toISOString().slice(0, 10),
+      transactionTime: initialValues?.transactionTime ?? getCurrentTimeInputValue(),
     },
   })
 
@@ -108,10 +114,15 @@ export function TransactionForm({
           <p className="font-body text-xs text-danger">{form.formState.errors.transactionDate?.message}</p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="note">{t('transactions.note')}</Label>
-          <Textarea id="note" {...form.register('note')} />
-          <p className="font-body text-xs text-danger">{form.formState.errors.note?.message}</p>
+          <Label htmlFor="transactionTime">{t('transactions.time')}</Label>
+          <Input id="transactionTime" type="time" {...form.register('transactionTime')} />
+          <p className="font-body text-xs text-danger">{form.formState.errors.transactionTime?.message}</p>
         </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="note">{t('transactions.note')}</Label>
+        <Textarea id="note" {...form.register('note')} />
+        <p className="font-body text-xs text-danger">{form.formState.errors.note?.message}</p>
       </div>
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={submitting}>{submitting ? t('common.loading') : submitLabel}</Button>
@@ -120,4 +131,3 @@ export function TransactionForm({
     </form>
   )
 }
-
