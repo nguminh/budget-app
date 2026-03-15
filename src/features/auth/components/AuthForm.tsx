@@ -115,7 +115,6 @@ export function AuthForm() {
           <Button type="button" variant="ghost" className="w-full" onClick={() => setIsSignup((current) => !current)}>
             {isSignup ? t('auth.toggleToSignIn') : t('auth.toggleToSignUp')}
           </Button>
-          <p className="text-center font-body text-xs text-ink/55">{t('auth.helper')}</p>
         </form>
       </CardContent>
     </Card>

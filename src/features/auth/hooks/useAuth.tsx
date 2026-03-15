@@ -3,6 +3,11 @@ import type { Session, User } from '@supabase/supabase-js'
 
 import i18n from '@/i18n'
 import { LANGUAGE_STORAGE_KEY } from '@/lib/constants'
+import {
+  DEFAULT_BUDGET_PREFERENCES,
+  DEFAULT_MONTHLY_BUDGET,
+  getDefaultProfileName,
+} from '@/lib/profileDefaults'
 import { queryClient } from '@/lib/queryClient'
 import { supabase, supabaseConfigError } from '@/lib/supabase'
 import type { Database } from '@/types/database'
@@ -15,6 +20,7 @@ type AuthContextValue = {
   profile: Profile | null
   loading: boolean
   profileLoading: boolean
+  needsOnboarding: boolean
   refreshProfile: () => Promise<void>
 }
 
@@ -28,10 +34,13 @@ async function fetchProfile(userId: string, user: User | null) {
 
   const fallbackProfile = {
     id: userId,
-    full_name: (user?.user_metadata?.full_name as string | undefined) ?? null,
+    full_name: getDefaultProfileName(user, (user?.user_metadata?.full_name as string | undefined) ?? null),
     locale: (window.localStorage.getItem(LANGUAGE_STORAGE_KEY) ?? 'en') as 'en' | 'fr',
     default_currency: 'CAD',
     plan: 'free' as const,
+    monthly_budget: DEFAULT_MONTHLY_BUDGET,
+    budget_preferences: DEFAULT_BUDGET_PREFERENCES,
+    onboarding_completed_at: null,
   }
 
   const { data: inserted } = await supabase.from('profiles').upsert(fallbackProfile as never).select('*').maybeSingle()
@@ -153,7 +162,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applySession])
 
   const value = useMemo(
-    () => ({ user, session, profile, loading, profileLoading, refreshProfile }),
+    () => ({
+      user,
+      session,
+      profile,
+      loading,
+      profileLoading,
+      needsOnboarding: Boolean(user && !profileLoading && profile && !profile.onboarding_completed_at),
+      refreshProfile,
+    }),
     [loading, profile, profileLoading, refreshProfile, session, user],
   )
 

@@ -99,3 +99,35 @@ a {
   border: 0;
   box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.08);
 }
+
+.budget-hero-input::-webkit-outer-spin-button,
+.budget-hero-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.budget-hero-input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.welcome-fade-out {
+  animation: welcome-fade-out 1.25s ease forwards;
+}
+
+@keyframes welcome-fade-out {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  18%,
+  72% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.985);
+  }
+}

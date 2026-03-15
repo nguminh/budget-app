@@ -20,14 +20,28 @@ export function ProtectedRoute({ children }: { children?: ReactNode }) {
 }
 
 export function PublicOnlyRoute({ children }: { children?: ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, loading, needsOnboarding, profileLoading } = useAuth()
 
-  if (loading) {
+  if (loading || (user && profileLoading)) {
     return <LoadingState fullScreen />
   }
 
   if (user) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={needsOnboarding ? '/onboarding' : '/dashboard'} replace />
+  }
+
+  return children ? <>{children}</> : <Outlet />
+}
+
+export function RequireCompletedOnboarding({ children }: { children?: ReactNode }) {
+  const { needsOnboarding, profileLoading } = useAuth()
+
+  if (profileLoading) {
+    return <LoadingState fullScreen />
+  }
+
+  if (needsOnboarding) {
+    return <Navigate to="/onboarding" replace />
   }
 
   return children ? <>{children}</> : <Outlet />

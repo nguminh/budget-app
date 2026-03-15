@@ -4,7 +4,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import App from '@/App'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/shared/LoadingState'
-import { ProtectedRoute, PublicOnlyRoute } from '@/components/shared/ProtectedRoute'
+import { ProtectedRoute, PublicOnlyRoute, RequireCompletedOnboarding } from '@/components/shared/ProtectedRoute'
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const TransactionsPage = lazy(() => import('@/pages/TransactionsPage'))
@@ -13,6 +13,7 @@ const EditTransactionPage = lazy(() => import('@/pages/EditTransactionPage'))
 const BudgetsPage = lazy(() => import('@/pages/BudgetsPage'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
+const OnboardingPage = lazy(() => import('@/pages/OnboardingPage'))
 
 function renderLazyPage(Component: LazyExoticComponent<ComponentType>) {
   return (
@@ -37,9 +38,17 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        element: <ProtectedRoute />,
+        children: [
+          { path: 'onboarding', element: renderLazyPage(OnboardingPage) },
+        ],
+      },
+      {
         element: (
           <ProtectedRoute>
-            <AppShell />
+            <RequireCompletedOnboarding>
+              <AppShell />
+            </RequireCompletedOnboarding>
           </ProtectedRoute>
         ),
         children: [

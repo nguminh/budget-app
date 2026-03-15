@@ -4,7 +4,7 @@ type Budget = Database['public']['Tables']['budgets']['Row']
 type Category = Database['public']['Tables']['categories']['Row']
 type Transaction = Database['public']['Tables']['transactions']['Row']
 
-type BudgetBucketKey = 'bills' | 'groceries' | 'leisure' | 'other' | 'subscriptions' | 'travel'
+export type BudgetBucketKey = 'bills' | 'groceries' | 'leisure' | 'other' | 'subscriptions' | 'travel'
 
 type BudgetBucketDefinition = {
   color: string
@@ -14,7 +14,7 @@ type BudgetBucketDefinition = {
   storageCategoryName: string
 }
 
-const budgetBucketDefinitions: BudgetBucketDefinition[] = [
+export const budgetBucketDefinitions: BudgetBucketDefinition[] = [
   { color: '#ef4444', key: 'bills', label: 'Bills', showInDashboard: true, storageCategoryName: 'Bills' },
   { color: '#f59e0b', key: 'leisure', label: 'Leisure', showInDashboard: true, storageCategoryName: 'Entertainment' },
   { color: '#8b5cf6', key: 'subscriptions', label: 'Subscriptions', showInDashboard: true, storageCategoryName: 'Health' },
