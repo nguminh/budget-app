@@ -3,18 +3,17 @@ import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
+import { BudgetAllocationEditor } from '@/features/budgets/components/BudgetAllocationEditor'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   allocationsToSave,
   createBudgetAllocationMap,
   getAutoBalanceCategoryId,
-  getCategoryAllocationLimit,
-  setCategoryAllocationAmount,
   rebalanceAllocationsForTotal,
+  setCategoryAllocationAmount,
 } from '@/features/budgets/lib/allocations'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
-import { cn, formatCurrency } from '@/lib/utils'
 import { buildBudgetSchema } from '@/lib/validations/budget'
 
 type BudgetCategory = {
@@ -42,11 +41,6 @@ function parseAmountInput(value: string) {
   return Number.isFinite(parsedValue) ? Math.max(0, parsedValue) : 0
 }
 
-function getSliderFill(value: number, max: number) {
-  const fillPercent = max > 0 ? Math.min((value / max) * 100, 100) : 0
-  return `linear-gradient(90deg, #111111 0%, #111111 ${fillPercent}%, rgba(17, 17, 17, 0.12) ${fillPercent}%, rgba(17, 17, 17, 0.12) 100%)`
-}
-
 export function BudgetForm({
   categories,
   initialValues,
@@ -60,9 +54,8 @@ export function BudgetForm({
   onSubmit: (values: BudgetValues) => Promise<void>
   submitting: boolean
 }) {
-  const { t, i18n } = useAppTranslation()
+  const { t } = useAppTranslation()
   const schema = buildBudgetSchema(t)
-  const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA'
   const categoryOptions = useMemo(() => categories, [categories])
   const autoBalanceCategoryId = useMemo(() => getAutoBalanceCategoryId(categoryOptions), [categoryOptions])
   const form = useForm<FormValues>({
@@ -100,7 +93,6 @@ export function BudgetForm({
   const safeTotalAmount = Number.isFinite(totalAmount) ? Math.max(0, totalAmount) : 0
   const monthField = form.register('month')
   const amountField = form.register('amount')
-  const autoBalanceCategory = categoryOptions.find((category) => category.id === autoBalanceCategoryId) ?? null
 
   const handleMonthChange = (event: ChangeEvent<HTMLInputElement>) => {
     monthField.onChange(event)
@@ -158,171 +150,13 @@ export function BudgetForm({
         </div>
       </div>
 
-      <div className="rounded-3xl border border-border/70 bg-muted/40 p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-foreground">{t('budgets.allocations')}</p>
-            <p className="mt-1 font-body text-sm text-ink/65">{t('budgets.allocationsHint')}</p>
-          </div>
-          <div className="w-full rounded-2xl bg-background/90 px-4 py-3 text-left shadow-soft sm:w-auto sm:text-right">
-            <p className="font-body text-xs uppercase tracking-[0.2em] text-ink/55">{t('budgets.autoAssigned')}</p>
-            <p className="mt-1 text-lg font-semibold">{formatCurrency(allocations[autoBalanceCategoryId ?? ''] ?? 0, 'CAD', locale)}</p>
-            <p className="mt-1 font-body text-xs text-ink/55">{autoBalanceCategory?.name ?? t('budgets.otherFallback')}</p>
-          </div>
-        </div>
-
-        <div className="mt-5 space-y-3 md:hidden">
-          {categoryOptions.length === 0 ? (
-            <p className="font-body text-sm text-ink/65">{t('budgets.noExpenseCategories')}</p>
-          ) : null}
-          {categoryOptions.map((category) => {
-            const amount = allocations[category.id] ?? 0
-            const limit = getCategoryAllocationLimit({
-              allocations,
-              autoBalanceCategoryId,
-              categoryId: category.id,
-              categories: categoryOptions,
-              totalAmount: safeTotalAmount,
-            })
-            const isAutoBalancedCategory = category.id === autoBalanceCategoryId
-            const share = safeTotalAmount > 0 ? Math.round((amount / safeTotalAmount) * 100) : 0
-
-            return (
-              <div
-                key={category.id}
-                className={cn(
-                  'space-y-2 rounded-[18px] border border-ink/15 bg-background/95 p-3.5 shadow-soft transition-colors duration-200',
-                  !isAutoBalancedCategory ? 'hover:border-border/70 hover:bg-card/45' : '',
-                )}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="mt-1 h-3 w-3 shrink-0 rounded-full"
-                      style={{ backgroundColor: category.color ?? '#6b7280' }}
-                    />
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold text-foreground">{category.name}</p>
-                      <p className="font-body text-xs text-ink/55">
-                        {isAutoBalancedCategory ? t('budgets.autoAssignedHint') : t('budgets.shareOfBudget', { value: share })}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <p className="text-base font-semibold">{formatCurrency(amount, 'CAD', locale)}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2.5">
-                  <input
-                    aria-label={t('budgets.categorySliderLabel', { category: category.name })}
-                    className={cn(
-                      'budget-slider h-3 w-full cursor-pointer appearance-none rounded-full border border-black/35 bg-transparent transition-transform duration-150 hover:scale-[1.01] active:scale-[1.005]',
-                      isAutoBalancedCategory ? 'cursor-not-allowed opacity-60' : '',
-                    )}
-                    disabled={isAutoBalancedCategory}
-                    max={limit}
-                    min={0}
-                    onChange={(event) => handleAllocationChange(category.id, event.target.value)}
-                    step="0.01"
-                    style={{ background: getSliderFill(amount, limit) }}
-                    type="range"
-                    value={Math.min(amount, limit)}
-                  />
-                  <Input
-                    aria-label={t('budgets.categoryInputLabel', { category: category.name })}
-                    className="h-10 rounded-xl px-3"
-                    disabled={isAutoBalancedCategory}
-                    max={limit}
-                    min={0}
-                    onChange={(event) => handleAllocationChange(category.id, event.target.value)}
-                    step="0.01"
-                    type="number"
-                    value={amount}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="mt-5 hidden gap-4 md:grid lg:grid-cols-2">
-          {categoryOptions.length === 0 ? (
-            <p className="font-body text-sm text-ink/65">{t('budgets.noExpenseCategories')}</p>
-          ) : null}
-          {categoryOptions.map((category) => {
-            const amount = allocations[category.id] ?? 0
-            const limit = getCategoryAllocationLimit({
-              allocations,
-              autoBalanceCategoryId,
-              categoryId: category.id,
-              categories: categoryOptions,
-              totalAmount: safeTotalAmount,
-            })
-            const isAutoBalancedCategory = category.id === autoBalanceCategoryId
-            const share = safeTotalAmount > 0 ? Math.round((amount / safeTotalAmount) * 100) : 0
-
-            return (
-              <div
-                key={category.id}
-                className={cn(
-                  'space-y-3 rounded-2xl border border-ink/15 bg-background/95 p-4 shadow-soft transition-colors duration-200',
-                  !isAutoBalancedCategory ? 'hover:border-border/70 hover:bg-card/45' : '',
-                )}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="h-3 w-3 shrink-0 rounded-full"
-                      style={{ backgroundColor: category.color ?? '#6b7280' }}
-                    />
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold text-foreground">{category.name}</p>
-                      <p className="font-body text-xs text-ink/55">
-                        {isAutoBalancedCategory ? t('budgets.autoAssignedHint') : t('budgets.shareOfBudget', { value: share })}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(amount, 'CAD', locale)}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid gap-3 md:grid-cols-[1fr_132px] md:items-center">
-                  <input
-                    aria-label={t('budgets.categorySliderLabel', { category: category.name })}
-                    className={cn(
-                      'budget-slider h-3 w-full cursor-pointer appearance-none rounded-full border border-black/35 bg-transparent transition-transform duration-150 hover:scale-[1.01] active:scale-[1.005]',
-                      isAutoBalancedCategory ? 'cursor-not-allowed opacity-60' : '',
-                    )}
-                    disabled={isAutoBalancedCategory}
-                    max={limit}
-                    min={0}
-                    onChange={(event) => handleAllocationChange(category.id, event.target.value)}
-                    step="0.01"
-                    style={{ background: getSliderFill(amount, limit) }}
-                    type="range"
-                    value={Math.min(amount, limit)}
-                  />
-                  <Input
-                    aria-label={t('budgets.categoryInputLabel', { category: category.name })}
-                    className="h-10 rounded-xl px-3"
-                    disabled={isAutoBalancedCategory}
-                    max={limit}
-                    min={0}
-                    onChange={(event) => handleAllocationChange(category.id, event.target.value)}
-                    step="0.01"
-                    type="number"
-                    value={amount}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      <BudgetAllocationEditor
+        allocations={allocations}
+        autoBalanceCategoryId={autoBalanceCategoryId}
+        categories={categoryOptions}
+        onAllocationChange={handleAllocationChange}
+        totalAmount={safeTotalAmount}
+      />
 
       <Button className="w-full rounded-xl sm:w-auto" type="submit" disabled={submitting || categoryOptions.length === 0}>
         {submitting ? t('common.loading') : t('budgets.save')}

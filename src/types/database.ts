@@ -1,4 +1,6 @@
-﻿export type Database = {
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+
+export type Database = {
   public: {
     Tables: {
       profiles: {
@@ -8,6 +10,9 @@
           locale: 'en' | 'fr'
           default_currency: string
           plan: 'free' | 'premium'
+          monthly_budget: number
+          budget_preferences: Json
+          onboarding_completed_at: string | null
           created_at: string
           updated_at: string
         }
@@ -17,6 +22,9 @@
           locale?: 'en' | 'fr'
           default_currency?: string
           plan?: 'free' | 'premium'
+          monthly_budget?: number
+          budget_preferences?: Json
+          onboarding_completed_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>
       }
@@ -98,4 +106,3 @@
     }
   }
 }
-

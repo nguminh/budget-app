@@ -1,15 +1,15 @@
-type BudgetCategory = {
+export type BudgetCategory = {
   id: string
   label?: string
   name?: string
 }
 
-type BudgetAllocation = {
+export type BudgetAllocation = {
   categoryId: string
   amount: number
 }
 
-type AllocationMap = Record<string, number>
+export type AllocationMap = Record<string, number>
 
 const CURRENCY_SCALE = 100
 

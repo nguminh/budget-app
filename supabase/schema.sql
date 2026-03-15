@@ -16,9 +16,21 @@ create table if not exists public.profiles (
   locale text not null default 'en' check (locale in ('en', 'fr')),
   default_currency text not null default 'CAD' check (char_length(default_currency) = 3),
   plan text not null default 'free' check (plan in ('free', 'premium')),
+  monthly_budget numeric(12,2) not null default 3000 check (monthly_budget >= 0),
+  budget_preferences jsonb not null default '{"bills":1200,"groceries":600,"leisure":350,"other":300,"subscriptions":200,"travel":350}'::jsonb,
+  onboarding_completed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+  add column if not exists monthly_budget numeric(12,2) not null default 3000 check (monthly_budget >= 0);
+
+alter table public.profiles
+  add column if not exists budget_preferences jsonb not null default '{"bills":1200,"groceries":600,"leisure":350,"other":300,"subscriptions":200,"travel":350}'::jsonb;
+
+alter table public.profiles
+  add column if not exists onboarding_completed_at timestamptz;
 
 create table if not exists public.categories (
   id uuid primary key default gen_random_uuid(),
@@ -294,6 +306,3 @@ values
   ('Gift', 'income', '#ec4899', true),
   ('Other', 'income', '#6b7280', true)
 on conflict do nothing;
-
-alter table public.transactions
-  add column if not exists transaction_time time not null default '12:00:00';
