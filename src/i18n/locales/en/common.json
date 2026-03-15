@@ -34,8 +34,8 @@
     "remaining": "Remaining budget",
     "count": "Transactions",
     "recent": "Recent transactions",
-    "chartTitle": "Spending by category",
-    "budgetTitle": "Budget progress",
+    "chartTitle": "Spending",
+    "budgetTitle": "Budget",
     "empty": "No transactions yet for this month.",
     "emptyHint": "Add a transaction to start seeing summaries and charts.",
     "budgetMissing": "Set this month's budget to track progress.",
@@ -68,7 +68,8 @@
     "successUpdate": "Transaction updated.",
     "successDelete": "Transaction deleted.",
     "loadError": "We couldn't load your transactions right now.",
-    "searchPlaceholder": "Search your transaction"
+    "searchPlaceholder": "Search merchants, categories, or types",
+    "time": "Time"
   },
   "budgets": {
     "title": "Budgets",
@@ -125,6 +126,7 @@
     "categoryRequired": "Choose a category.",
     "dateRequired": "Pick a date.",
     "monthRequired": "Pick a month.",
-    "noteMax": "Keep the note under 280 characters."
+    "noteMax": "Keep the note under 280 characters.",
+    "timeRequired": "Pick a time."
   }
 }

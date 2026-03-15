@@ -11,6 +11,7 @@ type TransactionPayload = {
   merchant: string
   note?: string
   transactionDate: string
+  transactionTime: string
   type: 'expense' | 'income'
 }
 
@@ -50,6 +51,7 @@ export function useCreateTransaction() {
         category_name: values.categoryName,
         note: values.note || null,
         transaction_date: values.transactionDate,
+        transaction_time: values.transactionTime,
         currency: 'CAD',
         source: 'manual',
       })
@@ -79,6 +81,7 @@ export function useUpdateTransaction(transactionId: string) {
           category_name: values.categoryName,
           note: values.note || null,
           transaction_date: values.transactionDate,
+          transaction_time: values.transactionTime,
         })
         .eq('id', transactionId)
 
@@ -108,4 +111,3 @@ export function useDeleteTransaction() {
     },
   })
 }
-

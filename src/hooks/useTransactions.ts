@@ -25,6 +25,7 @@ export function useTransactions(filters: { type?: string; currentMonthOnly?: boo
         .select('*')
         .eq('user_id', user.id)
         .order('transaction_date', { ascending: false })
+        .order('transaction_time', { ascending: false })
 
       if (filters.type && filters.type !== 'all') {
         queryBuilder = queryBuilder.eq('type', filters.type as 'expense' | 'income')
@@ -54,4 +55,3 @@ export function useTransactions(filters: { type?: string; currentMonthOnly?: boo
     transactions: query.data ?? ([] as Transaction[]),
   }
 }
-

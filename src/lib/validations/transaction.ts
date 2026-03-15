@@ -1,4 +1,4 @@
-﻿import { z } from 'zod'
+import { z } from 'zod'
 
 export function buildTransactionSchema(t: (key: string) => string) {
   return z.object({
@@ -8,6 +8,6 @@ export function buildTransactionSchema(t: (key: string) => string) {
     categoryId: z.string().min(1, t('validation.categoryRequired')),
     note: z.string().max(280, t('validation.noteMax')).optional().or(z.literal('')),
     transactionDate: z.string().min(1, t('validation.dateRequired')),
+    transactionTime: z.string().min(1, t('validation.timeRequired')),
   })
 }
-

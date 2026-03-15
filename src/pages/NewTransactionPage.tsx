@@ -24,6 +24,7 @@ export function NewTransactionPage() {
     categoryId: string
     note?: string
     transactionDate: string
+    transactionTime: string
   }) => {
     const category = categories.find((item) => item.id === values.categoryId)
     if (!category) {
@@ -40,6 +41,7 @@ export function NewTransactionPage() {
         merchant: values.merchant,
         note: values.note,
         transactionDate: values.transactionDate,
+        transactionTime: values.transactionTime,
         type: values.type,
       })
       toast.success(t('transactions.successCreate'))
@@ -72,4 +74,3 @@ export function NewTransactionPage() {
 }
 
 export default NewTransactionPage
-

@@ -61,11 +61,13 @@ describe('transaction mutations', () => {
         categoryName: 'Food',
         merchant: 'Cafe',
         transactionDate: '2026-03-14',
+        transactionTime: '09:15',
         type: 'expense',
       })
     })
 
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.transactions.root(user.id) })
+    expect(supabaseMock.insert).toHaveBeenCalledWith(expect.objectContaining({ transaction_time: '09:15' }))
   })
 
   it('invalidates transaction detail and lists after update', async () => {
@@ -79,6 +81,7 @@ describe('transaction mutations', () => {
         categoryName: 'Bills',
         merchant: 'Hydro',
         transactionDate: '2026-03-14',
+        transactionTime: '11:45',
         type: 'expense',
       })
     })
@@ -99,4 +102,3 @@ describe('transaction mutations', () => {
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.transactions.detail(user.id, 'txn-1') })
   })
 })
-
