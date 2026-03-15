@@ -8,6 +8,7 @@ import { ProtectedRoute, PublicOnlyRoute, RequireCompletedOnboarding } from '@/c
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const TransactionsPage = lazy(() => import('@/pages/TransactionsPage'))
+const ImportTransactionsPage = lazy(() => import('@/pages/ImportTransactionsPage'))
 const NewTransactionPage = lazy(() => import('@/pages/NewTransactionPage'))
 const EditTransactionPage = lazy(() => import('@/pages/EditTransactionPage'))
 const BudgetsPage = lazy(() => import('@/pages/BudgetsPage'))
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
         children: [
           { path: 'dashboard', element: renderLazyPage(DashboardPage) },
           { path: 'transactions', element: renderLazyPage(TransactionsPage) },
+          { path: 'transactions/import', element: renderLazyPage(ImportTransactionsPage) },
           { path: 'transactions/new', element: renderLazyPage(NewTransactionPage) },
           { path: 'transactions/:id/edit', element: renderLazyPage(EditTransactionPage) },
           { path: 'budgets', element: renderLazyPage(BudgetsPage) },
