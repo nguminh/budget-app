@@ -2,7 +2,7 @@ import { Crown, LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { exportUserDataAsCSV } from "../utils/exportUserDataAsCSV"
+import { exportUserDataAsCSV } from "@/utils/exportCsv"
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,9 +32,10 @@ export function SettingsPage() {
   }
 
   async function handleClick() {
+    if (!user) return;
     setLoading(true);
     try {
-      await exportUserDataAsCSV(supabase, user?user.id:null);
+      await exportUserDataAsCSV(supabase, user.id);
     } catch (err) {
       console.error("Export failed:", err);
       alert("Something went wrong. Please try again.");
