@@ -2,7 +2,7 @@ import { Crown, LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { exportUserDataAsCSV } from "../utils/exportCsv";
+import { exportUserDataAsCSV } from "../utils/exportUserDataAsCSV"
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

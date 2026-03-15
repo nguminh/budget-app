@@ -46,7 +46,7 @@ export function useTransactions(filters: { type?: string; currentMonthOnly?: boo
       return (data ?? []) as Transaction[]
     },
     queryKey: user ? queryKeys.transactions.list(user.id, filters) : (['transactions', 'anonymous', filters] as const),
-    staleTime: 60_000,
+    staleTime: 0,
   })
 
   return {

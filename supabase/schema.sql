@@ -294,3 +294,6 @@ values
   ('Gift', 'income', '#ec4899', true),
   ('Other', 'income', '#6b7280', true)
 on conflict do nothing;
+
+alter table public.transactions
+  add column if not exists transaction_time time not null default '12:00:00';
