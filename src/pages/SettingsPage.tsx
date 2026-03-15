@@ -38,10 +38,7 @@ export function SettingsPage() {
   return (
     <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
       <Card>
-        <CardHeader>
-          <CardTitle>{t('settings.title')}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
+        <CardContent className="flex flex-col gap-6 pt-5">
           <div className="rounded-[28px] bg-muted p-5">
             <p className="font-body text-sm text-ink/60">{t('settings.email')}</p>
             <p className="mt-1 text-lg font-semibold">{user?.email ?? '-'}</p>

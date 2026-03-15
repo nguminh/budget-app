@@ -47,10 +47,7 @@ export function TransactionsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl font-bold uppercase tracking-[0.08em] leading-none text-foreground md:text-4xl">{t('transactions.title')}</h1>
-          {statusLabel ? <p className="mt-2 font-body text-xs uppercase tracking-[0.2em] text-ink/50">{statusLabel}</p> : null}
-        </div>
+        <div>{statusLabel ? <p className="font-body text-xs uppercase tracking-[0.2em] text-ink/50">{statusLabel}</p> : null}</div>
         <Button asChild>
           <Link to="/transactions/new"><Plus className="size-4" />{t('transactions.add')}</Link>
         </Button>

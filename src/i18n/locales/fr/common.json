@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Maple Ledger",
-    "tagline": "Un budget mensuel pratique, sans le bruit."
+    "name": "RWY",
+    "tagline": "Vos finances en vue."
   },
   "nav": {
     "dashboard": "Tableau de bord",

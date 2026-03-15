@@ -8,7 +8,7 @@ export function MobileBottomNav() {
   const { t } = useAppTranslation()
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-[18px] border border-border bg-card/95 p-1.5 shadow-soft backdrop-blur lg:hidden">
+    <nav className="fixed bottom-3 left-1/2 z-40 w-[70%] max-w-md -translate-x-1/2 rounded-[18px] border border-border bg-card/95 p-1.5 shadow-soft backdrop-blur lg:hidden">
       <div className="grid grid-cols-4 gap-1">
         {NAV_ITEMS.map((item) => {
           const Icon = navIconMap[item.icon]

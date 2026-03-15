@@ -82,7 +82,6 @@ export function BudgetsPage() {
         <CardHeader className="gap-3 p-4 pb-0 md:p-5 md:pb-0">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <CardTitle>{t('budgets.current')}</CardTitle>
               {isFetching || txFetching ? <p className="mt-1 font-body text-xs uppercase tracking-[0.2em] text-ink/50">{t('common.loading')}</p> : null}
             </div>
             <div className="text-right">

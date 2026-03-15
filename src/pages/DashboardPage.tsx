@@ -22,13 +22,19 @@ function formatTransactionDateTime(date: string, time: string | null | undefined
   return time ? `${formattedDate} - ${time.slice(0, 5)}` : formattedDate
 }
 
+function getBudgetUsageColor(progress: number) {
+  const boundedProgress = Math.max(0, Math.min(progress, 100))
+  const hue = 135 - (boundedProgress / 100) * 135
+  return `hsl(${hue} 68% 48%)`
+}
+
 export function DashboardPage() {
   const month = formatMonthInput()
   const { t, i18n } = useAppTranslation()
   const navigate = useNavigate()
   const longPressTimerRef = useRef<number | null>(null)
   const [pressedId, setPressedId] = useState<string | null>(null)
-  const { transactions, error, isError, isFetching, isLoading } = useTransactions({ currentMonthOnly: true })
+  const { transactions, error, isError, isLoading } = useTransactions({ currentMonthOnly: true })
   const { budget, categoryBudgets } = useBudget(month)
   const { categories, error: categoriesError, isLoading: categoriesLoading } = useCategories()
   const locale = i18n.language === 'fr' ? 'fr-CA' : 'en-CA'
@@ -71,7 +77,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-4 md:space-y-5">
-      <section className="grid grid-cols-3 gap-2.5 md:gap-3">
+      <section className="grid gap-2.5 sm:grid-cols-3 md:gap-3">
         <SummaryCard title={t('dashboard.expenses')} value={formatCurrency(expenses, 'CAD', locale)} description={t('dashboard.subtitle')} icon={TrendingDown} tone="warning" />
         <SummaryCard title={t('dashboard.income')} value={formatCurrency(income, 'CAD', locale)} description={t('dashboard.subtitle')} icon={TrendingUp} tone="success" />
         <SummaryCard title={t('dashboard.remaining')} value={formatCurrency(remaining, 'CAD', locale)} description={budget ? t('dashboard.ofBudget') : t('dashboard.budgetMissing')} icon={PiggyBank} />
@@ -79,20 +85,17 @@ export function DashboardPage() {
       {transactions.length === 0 ? (
         <EmptyState title={t('dashboard.empty')} description={t('dashboard.emptyHint')} />
       ) : (
-        <section className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr] items-start">
-          <ExpensesPieChart data={grouped} locale={locale} title={t('dashboard.chartTitle')} />
-          <div className="space-y-4">
+        <>
+          <section className="grid items-start gap-4 xl:grid-cols-[1.02fr_0.98fr]">
+            <ExpensesPieChart data={grouped} locale={locale} title={t('dashboard.chartTitle')} />
             <Card>
-              <CardHeader className="space-y-2">
+              <CardHeader>
                 <CardTitle>{t('dashboard.budgetTitle')}</CardTitle>
-                <div className="flex items-end justify-between gap-4">
-                  <p className="text-xl font-semibold md:text-2xl">{formatCurrency(expenses, 'CAD', locale)}</p>
-                  <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-ink/55">{t('dashboard.budgetUsed')}</p>
-                </div>
               </CardHeader>
-              <CardContent className="space-y-3 pt-0">
+              <CardContent className="space-y-3 pt-1">
                 {categoryTracking.map((bucket) => {
                   const progress = bucket.budgetAmount > 0 ? Math.min((bucket.spentAmount / bucket.budgetAmount) * 100, 100) : 0
+                  const fillColor = getBudgetUsageColor(progress)
 
                   return (
                     <div key={bucket.key} className="space-y-1.5">
@@ -102,44 +105,42 @@ export function DashboardPage() {
                           {formatCurrency(bucket.spentAmount, 'CAD', locale)} / {formatCurrency(bucket.budgetAmount, 'CAD', locale)}
                         </p>
                       </div>
-                      <div className="h-3.5 overflow-hidden rounded-full bg-muted/80 transition-all duration-200" style={{ border: `1px solid ${bucket.color}55` }}>
-                        <div className="h-full rounded-full transition-[width] duration-300" style={{ backgroundColor: bucket.color, width: `${progress}%` }} />
+                      <div className="h-3.5 overflow-hidden rounded-full bg-muted/80 transition-all duration-200" style={{ border: `1px solid ${fillColor}55` }}>
+                        <div className="h-full rounded-full transition-[width] duration-300" style={{ backgroundColor: fillColor, width: `${progress}%` }} />
                       </div>
                     </div>
                   )
                 })}
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('dashboard.recent')}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1 pt-0.5">
-                {recent.map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className={[
-                      'flex items-center justify-between rounded-[14px] border border-border/35 bg-transparent px-3 py-2.5 transition duration-200',
-                      pressedId === transaction.id ? 'scale-[0.99] border-foreground/20' : 'hover:border-border/65 hover:bg-card/20',
-                    ].join(' ')}
-                    onTouchEnd={cancelLongPress}
-                    onTouchMove={cancelLongPress}
-                    onTouchStart={() => startLongPress(transaction.id)}
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">{transaction.merchant}</p>
-                      <p className="font-body text-sm text-ink/60">{formatTransactionDateTime(transaction.transaction_date, transaction.transaction_time, locale)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-foreground">{formatCurrency(Number(transaction.amount), transaction.currency, locale)}</p>
-                      <Badge className="mt-1 bg-card/0"><ArrowUpRight className="mr-1 size-3" />{transaction.type === 'expense' ? t('common.expense') : t('common.income')}</Badge>
-                    </div>
+          </section>
+          <section className="space-y-3">
+            <CardTitle>{t('dashboard.recent')}</CardTitle>
+            <div className="space-y-2">
+              {recent.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className={[
+                    'flex items-center justify-between rounded-[11px] border border-border/60 bg-card/90 px-3.5 py-3 transition duration-200 md:px-4',
+                    pressedId === transaction.id ? 'scale-[0.99] border-foreground/20' : 'hover:border-border hover:bg-card',
+                  ].join(' ')}
+                  onTouchEnd={cancelLongPress}
+                  onTouchMove={cancelLongPress}
+                  onTouchStart={() => startLongPress(transaction.id)}
+                >
+                  <div>
+                    <p className="font-medium text-foreground">{transaction.merchant}</p>
+                    <p className="font-body text-sm text-ink/60">{formatTransactionDateTime(transaction.transaction_date, transaction.transaction_time, locale)}</p>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+                  <div className="text-right">
+                    <p className="font-semibold text-foreground">{formatCurrency(Number(transaction.amount), transaction.currency, locale)}</p>
+                    <Badge className="mt-1 border-0 bg-transparent px-0 text-ink/65"><ArrowUpRight className="mr-1 size-3" />{transaction.type === 'expense' ? t('common.expense') : t('common.income')}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </>
       )}
     </div>
   )
