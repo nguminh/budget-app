@@ -41,7 +41,7 @@ export function SettingsPage() {
         <CardHeader>
           <CardTitle>{t('settings.title')}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="flex flex-col gap-6">
           <div className="rounded-[28px] bg-muted p-5">
             <p className="font-body text-sm text-ink/60">{t('settings.email')}</p>
             <p className="mt-1 text-lg font-semibold">{user?.email ?? '-'}</p>
