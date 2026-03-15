@@ -1,6 +1,6 @@
-﻿# Maple Ledger
+﻿# RWY
 
-Maple Ledger is Iteration 1 of a bilingual personal budgeting web app built with React, Vite, Tailwind, and Supabase. It covers auth, transaction CRUD, monthly budget tracking, dashboard charts, and a responsive mobile/desktop shell.
+RWY is Iteration 1 of a bilingual personal budgeting web app built with React, Vite, Tailwind, and Supabase. It covers auth, transaction CRUD, monthly budget tracking, dashboard charts, and a responsive mobile/desktop shell.
 
 ## Iteration 1 scope
 
