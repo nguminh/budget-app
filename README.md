@@ -1,75 +1,181 @@
-﻿# RWY
+# RWY
 
-RWY is Iteration 1 of a bilingual personal budgeting web app built with React, Vite, Tailwind, and Supabase. It covers auth, transaction CRUD, monthly budget tracking, dashboard charts, and a responsive mobile/desktop shell.
+RWY is a bilingual personal budgeting app built with React, Vite, Tailwind, and Supabase. The current app covers authentication, onboarding, transaction tracking, monthly budget planning, CSV export, and an assisted transaction import flow with a premium-style product story.
 
-## Iteration 1 scope
+## What ships today
 
-- Email sign up, sign in, and sign out with Supabase Auth
-- Protected routes for dashboard, transactions, budgets, and settings
-- Create, edit, delete, and list transactions
-- Current monthly overall budget management
-- Dashboard summaries, recent transactions, and spending-by-category chart
-- English and French UI with persisted language preference
+- Supabase email auth with protected routes and automatic profile bootstrapping
+- Three-step onboarding for name, monthly budget, and default category allocation
+- Dashboard with monthly income, expenses, remaining budget, recent transactions, spending chart, and budget bucket progress
+- Transaction management with create, edit, delete, search, type filtering, and month filtering
+- Import workspace for transaction files with review-before-save editing
+- Monthly budget editor with category allocation sliders/inputs and automatic balancing into `Other`
+- Settings page with profile editing, language switching, CSV export, plan teaser, and sign out
+- English and French localization, persisted through profile data and local storage
 - Responsive desktop sidebar and mobile bottom navigation
+
+## Import flow
+
+The app includes a transaction import workspace at `/transactions/import`.
+
+- Exact CSV and JSON files can be imported directly when they use canonical transaction fields
+- Irregular CSV/JSON files, XLSX files, PDFs, and images fall back to Gemini-assisted extraction
+- Every imported row is reviewed in-app before saving
+- Users can correct merchant, amount, type, category, date, time, and notes before import
+- Confidence badges and model warnings help highlight rows that need attention
+
+Direct import works best when your file includes fields such as:
+
+- `type`
+- `amount`
+- `merchant`
+- `category`, `categoryName`, or `categoryId`
+- `transactionDate` or `date`
+- Optional `transactionTime` or `time`
+- Optional `note`
+
+## Premium positioning
+
+For product messaging, the import experience should be treated as a premium feature.
+
+- Gemini-assisted transaction import is the premium feature story in the current README
+- The Settings page already includes a premium teaser card
+- The import UI also includes a disabled Plaid teaser for future banking integrations
+
+Important implementation note:
+
+- There is no billing or entitlement enforcement yet
+- Plaid sync is not implemented yet
+- Import is available in the current build, but the README positions it as premium
+
+## Routes
+
+- `/login`
+- `/onboarding`
+- `/dashboard`
+- `/transactions`
+- `/transactions/import`
+- `/transactions/new`
+- `/transactions/:id/edit`
+- `/budgets`
+- `/settings`
 
 ## Stack
 
-- React 19 + Vite 8 + TypeScript
+- React 19
+- Vite 8
+- TypeScript
+- React Router 7
+- TanStack Query 5
 - Tailwind CSS
-- React Router
+- Radix UI primitives for selected controls
 - Supabase Auth + Postgres
 - react-hook-form + zod
 - Recharts
-- react-i18next + i18next
+- i18next + react-i18next
 - sonner
 - lucide-react
-- date-fns
+- Vitest + Testing Library
+- Gemini via the Google Generative Language API for assisted imports
 
 ## Environment variables
 
-Copy `.env.example` to `.env` and fill in:
+Create a `.env` file in the project root. You can start from [`./.env copy.example`](/D:/budget-app/.env%20copy.example) and add the missing values.
+
+Required:
 
 ```env
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 ```
 
-## Supabase setup
+Optional, for Gemini-assisted import:
 
-1. Create a Supabase project.
-2. Copy the project URL and anon public key into `.env`.
-3. In Supabase Auth, enable Email provider.
-4. For fast hackathon testing, optionally disable email confirmation.
-5. Run the SQL in [supabase/schema.sql](/D:/budget-app/supabase/schema.sql).
-6. Confirm RLS and policies were created successfully.
-7. Seeded default categories will be inserted by the schema.
+```env
+GEMINI_API_KEY=
+GEMINI_MODEL=
+```
+
+The app also accepts:
+
+```env
+VITE_GEMINI_API_KEY=
+VITE_GEMINI_MODEL=
+```
 
 ## Local development
 
 ```bash
 npm install
-npm run build
 npm run dev
 ```
 
-The Vite dev server will print the local URL, typically `http://localhost:5173`.
+Useful scripts:
 
-## PWA note
+```bash
+npm run build
+npm run lint
+npm test
+```
 
-The old repo registered a cache-first service worker that would likely serve stale assets during rapid iteration. Iteration 1 keeps the manifest file but does not register the service worker in the app entrypoint.
+The Vite dev server usually runs at `http://localhost:5173`.
+
+## Supabase setup
+
+1. Create a Supabase project.
+2. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to `.env`.
+3. In Supabase Auth, enable the Email provider.
+4. For quick local testing, optionally disable email confirmation.
+5. Run [`supabase/schema.sql`](/D:/budget-app/supabase/schema.sql) in the SQL editor.
+
+The schema sets up:
+
+- `profiles`
+- `categories`
+- `transactions`
+- `budgets`
+- updated-at triggers
+- row-level security policies
+- an auth trigger that creates a profile record for new users
+- seeded default income and expense categories
+
+## Data model notes
+
+- Currency currently defaults to `CAD`
+- Monthly budgets support both an overall amount and category-specific allocations
+- Profile records store locale, monthly budget, budget allocation preferences, and onboarding completion
+- Transactions are owned per user and protected by RLS
+
+## Testing
+
+The project includes tests around key hooks and budget logic, including:
+
+- auth state
+- transaction queries
+- transaction mutations
+- budget mutations
+- allocation and budget bucket utilities
+
+Run the full suite with:
+
+```bash
+npm test
+```
 
 ## Known limitations
 
-- Budget UI currently manages the overall monthly budget, not category budgets.
-- Currency is stored as CAD for Iteration 1, with only a placeholder for future expansion.
-- No OCR, bank sync, premium billing, AI categorization, or offline sync yet.
-- Settings exposes a premium teaser card only.
+- No billing, subscriptions, or entitlement checks yet
+- No live bank sync yet; Plaid is only a teaser in the UI
+- Import still depends on human review before save, especially on Gemini-assisted parses
+- Currency support is still centered on CAD
+- CSV export currently focuses on transaction data
+- No offline sync or background service worker support is enabled
 
-## Future ideas
+## Roadmap ideas
 
-- Category-specific budgets
-- Custom user categories in the UI
-- Receipt OCR and voice input
-- Premium analytics and automation
-- Bank import or sync
-
+- Real premium gating and billing
+- Plaid-based banking integrations
+- More export formats and reporting
+- Stronger import templates for bank-specific CSVs
+- Additional analytics and automation
+- Expanded currency support
