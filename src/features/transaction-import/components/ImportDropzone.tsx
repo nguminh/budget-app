@@ -1,4 +1,4 @@
-import { FileUp, LoaderCircle, Sparkles } from 'lucide-react'
+import { FileUp, Landmark, LoaderCircle, Sparkles } from 'lucide-react'
 import { useRef, useState, type DragEvent } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -93,12 +93,23 @@ export function ImportDropzone({
                 <p className="max-w-2xl font-body text-sm text-ink/68">{description}</p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {['CSV', 'JSON', 'XLSX', 'PDF', 'PHOTO'].map((label) => (
                 <Badge key={label} className="bg-muted/80 text-[11px] uppercase tracking-[0.18em] text-ink/65">
                   {label}
                 </Badge>
               ))}
+              <Button
+                aria-label="Bank integrations coming soon via Plaid"
+                className="cursor-default border-border/80 bg-muted/60 text-[11px] uppercase tracking-[0.16em] text-ink/55 hover:translate-y-0 hover:bg-muted/60"
+                disabled
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                <Landmark className="size-3.5" />
+                Plaid coming soon
+              </Button>
             </div>
           </div>
 
