@@ -2,6 +2,7 @@ import { Crown, LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { ExportButton } from '@/features/settings/exportCsv'
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -41,11 +42,12 @@ export function SettingsPage() {
           <CardTitle>{t('settings.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <LanguageSwitcher value={language} onChange={(value) => void handleLanguageChange(value)} />
           <div className="rounded-[28px] bg-muted p-5">
             <p className="font-body text-sm text-ink/60">{t('settings.email')}</p>
             <p className="mt-1 text-lg font-semibold">{user?.email ?? '-'}</p>
           </div>
+          <LanguageSwitcher value={language} onChange={(value) => void handleLanguageChange(value)} />
+          <ExportButton userId={user?.id} />
           <Button variant="danger" onClick={() => void handleSignOut()}><LogOut className="size-4" />{t('settings.signOut')}</Button>
         </CardContent>
       </Card>

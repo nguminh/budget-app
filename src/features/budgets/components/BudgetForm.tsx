@@ -160,7 +160,7 @@ export function BudgetForm({
       </div>
 
       <div className="rounded-3xl border border-border/70 bg-muted/40 p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className=" items-start justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-foreground">{t('budgets.allocations')}</p>
             <p className="mt-1 font-body text-sm text-ink/65">{t('budgets.allocationsHint')}</p>
@@ -226,7 +226,6 @@ export function BudgetForm({
                     value={Math.min(amount, limit)}
                   />
                   <Input
-                    aria-label={t('budgets.categoryInputLabel', { category: category.name })}
                     disabled={isAutoBalancedCategory}
                     max={limit}
                     min={0}
