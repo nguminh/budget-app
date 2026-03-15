@@ -131,7 +131,9 @@ export function TransactionList({
                 <TableCell>{transaction.category_name}</TableCell>
                 <TableCell>{transaction.type === 'expense' ? t('common.expense') : t('common.income')}</TableCell>
                 <TableCell>{format(new Date(transaction.transaction_date), 'PPP')}</TableCell>
-                <TableCell className="text-right font-semibold">{formatCurrency(transaction.amount, transaction.currency, locale)}</TableCell>
+                <TableCell className={`text-right font-semibold ${
+                  transaction.type === 'expense' ? 'text-danger' : 'text-accent'
+                }`}>{formatCurrency(transaction.amount, transaction.currency, locale)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button asChild size="sm" variant="outline"><Link to={`/transactions/${transaction.id}/edit`}>{t('transactions.edit')}</Link></Button>

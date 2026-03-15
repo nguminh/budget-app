@@ -67,7 +67,8 @@
     "successCreate": "Transaction ajout�e.",
     "successUpdate": "Transaction mise � jour.",
     "successDelete": "Transaction supprim�e.",
-    "loadError": "Impossible de charger vos transactions pour le moment."
+    "loadError": "Impossible de charger vos transactions pour le moment.",
+    "searchPlaceholder": "Rechercher votre transaction"
   },
   "budgets": {
     "title": "Budgets",

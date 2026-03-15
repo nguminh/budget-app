@@ -19,7 +19,7 @@ export function ExportButton({ userId }) {
   }
 
   return (
-    <button onClick={handleClick} disabled={loading}>
+    <button className="bg-blue-500 hover:bg-blue-500/80 rounded-lg" onClick={handleClick} disabled={loading}>
       {loading ? "Exporting..." : "Export CSV"}
     </button>
   );

@@ -2,7 +2,7 @@ import { Crown, LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { ExportButton } from '@/features/settings/exportCsv'
+import { exportUserDataAsCSV } from "../utils/exportCsv";
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +16,7 @@ export function SettingsPage() {
   const { t } = useAppTranslation()
   const { user, profile, refreshProfile } = useAuth()
   const [language, setLanguage] = useState(i18n.language)
+  const [loading, setLoading] = useState(false);
 
   const handleLanguageChange = async (value: string) => {
     setLanguage(value)
@@ -28,6 +29,18 @@ export function SettingsPage() {
     }
 
     toast.success(t('settings.languageSaved'))
+  }
+
+  async function handleClick() {
+    setLoading(true);
+    try {
+      await exportUserDataAsCSV(supabase, user?user.id:null);
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const handleSignOut = async () => {
@@ -47,7 +60,7 @@ export function SettingsPage() {
             <p className="mt-1 text-lg font-semibold">{user?.email ?? '-'}</p>
           </div>
           <LanguageSwitcher value={language} onChange={(value) => void handleLanguageChange(value)} />
-          <ExportButton userId={user?.id} />
+          <Button variant="default" onClick={() => handleClick()}>Export your data as CSV</Button>
           <Button variant="danger" onClick={() => void handleSignOut()}><LogOut className="size-4" />{t('settings.signOut')}</Button>
         </CardContent>
       </Card>

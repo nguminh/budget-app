@@ -67,7 +67,8 @@
     "successCreate": "Transaction added.",
     "successUpdate": "Transaction updated.",
     "successDelete": "Transaction deleted.",
-    "loadError": "We couldn't load your transactions right now."
+    "loadError": "We couldn't load your transactions right now.",
+    "searchPlaceholder": "Search your transaction"
   },
   "budgets": {
     "title": "Budgets",
