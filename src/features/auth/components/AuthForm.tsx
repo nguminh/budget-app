@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
+import { BrandMark } from '@/components/shared/BrandMark'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -11,12 +12,6 @@ import { Label } from '@/components/ui/label'
 import { useAppTranslation } from '@/hooks/useAppTranslation'
 import { supabase, supabaseConfigError } from '@/lib/supabase'
 import { buildAuthSchema } from '@/lib/validations/auth'
-
-type AuthValues = {
-  fullName?: string
-  email: string
-  password: string
-}
 
 function getAuthErrorMessage(error: unknown) {
   if (error instanceof TypeError) {
@@ -91,7 +86,7 @@ export function AuthForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <p className="font-body text-xs uppercase tracking-[0.25em] text-ink/55">{t('app.name')}</p>
+        <BrandMark className="text-[1.85rem]" />
         <CardTitle>{isSignup ? t('auth.signUp') : t('auth.signIn')}</CardTitle>
         <p className="font-body text-sm text-ink/70">{t('auth.subtitle')}</p>
       </CardHeader>

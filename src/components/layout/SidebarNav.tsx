@@ -9,9 +9,8 @@ export function SidebarNav() {
 
   return (
     <aside className="sticky top-3 hidden h-[calc(100vh-1.5rem)] w-64 shrink-0 flex-col rounded-[20px] border border-border bg-card px-4 py-5 shadow-soft lg:flex">
-      <p className="font-body text-sm uppercase tracking-[0.3em] text-ink/45">Maple Ledger</p>
-      <p className="mt-2 font-display text-xl font-bold uppercase tracking-[0.08em] leading-tight text-foreground">
-        Personal budgeting that feels calm.
+      <p className="font-display text-xl font-bold uppercase tracking-[0.08em] leading-tight text-foreground">
+        Calm budgeting that stays clear.
       </p>
       <nav className="mt-6 space-y-1.5">
         {NAV_ITEMS.map((item) => {

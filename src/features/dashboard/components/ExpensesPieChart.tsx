@@ -33,21 +33,31 @@ export function ExpensesPieChart({
   locale: string
   title: string
 }) {
+  const totalSpent = useMemo(() => data.reduce((sum, entry) => sum + entry.value, 0), [data])
   const tooltipFormatter = useMemo(
     () => (value: number) => formatCurrency(value, 'CAD', locale),
     [locale],
   )
 
   return (
-    <Card className="border-transparent bg-transparent shadow-none">
-      <CardHeader>
+    <Card className="bg-white">
+      <CardHeader className="pb-1">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 pt-2 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center">
-        <div className="h-[280px] md:h-[320px]">
+      <CardContent className="grid gap-4 pt-1 lg:grid-cols-[minmax(280px,1fr)_240px] lg:items-center">
+        <div className="relative mx-auto h-[250px] w-full max-w-[320px] md:h-[280px] md:max-w-[360px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" innerRadius={70} outerRadius={110} paddingAngle={3}>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                innerRadius="60%"
+                outerRadius="84%"
+                paddingAngle={3}
+                cx="50%"
+                cy="50%"
+              >
                 {data.map((entry, index) => (
                   <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
                 ))}
@@ -55,10 +65,16 @@ export function ExpensesPieChart({
               <Tooltip formatter={tooltipFormatter} />
             </PieChart>
           </ResponsiveContainer>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-ink/55">Total spent</span>
+            <span className="mt-1 text-lg font-semibold text-foreground md:text-2xl">
+              {formatCurrency(totalSpent, 'CAD', locale)}
+            </span>
+          </div>
         </div>
         <div className="space-y-2">
           {data.map((entry, index) => (
-            <div key={entry.name} className="flex items-center justify-between gap-3 rounded-[14px] border border-border/35 bg-transparent px-3 py-2">
+            <div key={entry.name} className="flex items-center justify-between gap-3 rounded-[14px] border border-border/45 bg-white px-3 py-2">
               <div className="flex items-center gap-2.5">
                 <span className="h-3 w-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                 <span className="font-body text-sm text-foreground">{entry.name}</span>

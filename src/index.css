@@ -1,3 +1,6 @@
+@import url('https://cdn.jsdelivr.net/npm/cal-sans@1.0.0/index.css');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,7 +8,7 @@
 :root {
   color: #1b1b18;
   background: #f4efe6;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Inter', 'Segoe UI Variable', sans-serif;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
@@ -40,7 +43,7 @@ a,
 li,
 small,
 .font-body {
-  font-family: 'Inter Variable', 'Segoe UI Variable', sans-serif;
+  font-family: 'Inter', 'Segoe UI Variable', sans-serif;
 }
 
 h1,
@@ -50,7 +53,13 @@ h4,
 h5,
 h6,
 .font-display {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Cal Sans', 'Inter', sans-serif;
+}
+
+.font-brand {
+  font-family: 'EB Garamond', 'Times New Roman', Times, serif;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  letter-spacing: -0.08em;
 }
 
 button {

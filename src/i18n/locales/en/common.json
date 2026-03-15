@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Maple Ledger",
-    "tagline": "A practical monthly budget, without the noise."
+    "name": "RWY",
+    "tagline": "Money in view."
   },
   "nav": {
     "dashboard": "Dashboard",
