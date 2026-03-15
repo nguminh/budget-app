@@ -1,3 +1,5 @@
+Deployed on https://budget-app-ashen.vercel.app/
+
 # RWY
 
 RWY is a bilingual personal budgeting app built with React, Vite, Tailwind, and Supabase. The current app covers authentication, onboarding, transaction tracking, monthly budget planning, CSV export, and an assisted transaction import flow with a premium-style product story.
