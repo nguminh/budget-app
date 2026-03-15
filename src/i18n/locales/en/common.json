@@ -26,6 +26,12 @@
     "successSignin": "Welcome back.",
     "errorGeneric": "Something went wrong. Please try again."
   },
+  "sidebar": {
+    "hitline": "Stay calm and budget",
+    "budgetProgress": "Month progress",
+    "used": "of budget used",
+    "summary": "Help us plant trees by the end of the month by reaching your saving goals!"
+  },
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "This month at a glance",

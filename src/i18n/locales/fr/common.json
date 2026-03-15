@@ -26,6 +26,12 @@
     "successSignin": "Bon retour.",
     "errorGeneric": "Une erreur est survenue. Veuillez r�essayer."
   },
+  "sidebar": {
+    "hitline": "Budg�tez avec calme",
+    "budgetProgress": "Progression du mois",
+    "used": "du budget utilis�",
+    "summary": "Aidez-nous � planter des arbres d'ici la fin du mois en atteignant vos objectifs d'�pargne !"
+  },
   "dashboard": {
     "title": "Tableau de bord",
     "subtitle": "Le mois en un coup d'oeil",
