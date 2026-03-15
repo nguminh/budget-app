@@ -1,12 +1,13 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowUpRight, PiggyBank, TrendingDown, TrendingUp } from 'lucide-react'
+import { ArrowUpRight, PiggyBank, Plus, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { LoadingState } from '@/components/shared/LoadingState'
 import { SummaryCard } from '@/components/shared/SummaryCard'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import ExpensesPieChart from '@/features/dashboard/components/ExpensesPieChart'
 import { useDashboardSummary } from '@/features/dashboard/hooks/useDashboardSummary'
@@ -115,7 +116,12 @@ export function DashboardPage() {
             </Card>
           </section>
           <section className="space-y-3">
-            <CardTitle>{t('dashboard.recent')}</CardTitle>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle>{t('dashboard.recent')}</CardTitle>
+              <Button aria-label={t('transactions.add')} size="icon" onClick={() => navigate('/transactions/new')}>
+                <Plus className="size-4" />
+              </Button>
+            </div>
             <div className="space-y-2">
               {recent.map((transaction) => (
                 <div
