@@ -1,6 +1,6 @@
 {
-  "name": "Budget App",
-  "short_name": "Budget",
+  "name": "RWY",
+  "short_name": "RWY",
   "description": "A mobile-friendly budgeting app shell with onboarding, analysis, and transactions.",
   "start_url": "/",
   "display": "standalone",
