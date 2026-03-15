@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import { LayoutDashboard, ReceiptText, Settings2, WalletCards } from 'lucide-react'
 
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
@@ -25,7 +25,9 @@ export function AppShell() {
         <div className="flex min-w-0 flex-1 flex-col gap-6">
           <header className="border-b border-border/70 pb-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <BrandMark className="text-[2.4rem] md:text-[3.1rem]" />
+              <Link className="w-fit transition-opacity duration-200 hover:opacity-75" to="/dashboard">
+                <BrandMark className="text-[2.4rem] md:text-[3.1rem]" />
+              </Link>
               <h1 className="text-4xl font-semibold uppercase tracking-[0.06em] text-foreground md:text-6xl md:leading-none">
                 {t(currentTitle)}
               </h1>
