@@ -1,0 +1,11 @@
+type,amount,merchant,category,transactionDate,transactionTime,note
+expense,86.42,FreshMart,Groceries,2026-03-01,10:14,Weekly grocery run
+expense,3.35,TTC,Transport,2026-03-01,08:12,Streetcar fare
+expense,24.80,Thai Orchid,Dining,2026-03-02,19:05,Dinner with friends
+expense,59.99,Maple Mobile,Bills,2026-03-03,09:00,Phone bill
+expense,18.50,CineNova,Entertainment,2026-03-04,20:10,Movie ticket
+expense,42.75,PharmaPlus,Health,2026-03-05,17:42,Prescription refill
+expense,129.90,North Outfitters,Shopping,2026-03-06,13:26,Spring jacket
+income,2450.00,Acme Corp,Salary,2026-03-07,09:00,Biweekly paycheck
+income,480.00,Pixel Studio,Freelance,2026-03-08,15:30,Landing page project
+income,75.00,Aunt May,Gift,2026-03-09,11:45,Birthday gift
