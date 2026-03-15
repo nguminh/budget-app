@@ -205,6 +205,12 @@
     "noCategory": "Uncategorized",
     "missingEnv": "Supabase environment variables are missing."
   },
+  "routeError": {
+    "title": "This screen hit a snag",
+    "description": "We couldn't open that page right now. Try refreshing, then head back to your dashboard if it still acts up.",
+    "refresh": "Refresh app",
+    "goHome": "Go to dashboard"
+  },
   "validation": {
     "email": "Enter a valid email address.",
     "passwordMin": "Password must be at least 6 characters.",

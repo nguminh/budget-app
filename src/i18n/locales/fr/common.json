@@ -205,6 +205,12 @@
     "noCategory": "Sans categorie",
     "missingEnv": "Les variables d'environnement Supabase sont manquantes."
   },
+  "routeError": {
+    "title": "Cette page a rencontre un probleme",
+    "description": "Impossible d'ouvrir cette page pour le moment. Rechargez l'application, puis retournez au tableau de bord si le probleme continue.",
+    "refresh": "Recharger l'application",
+    "goHome": "Aller au tableau de bord"
+  },
   "validation": {
     "email": "Entrez une adresse courriel valide.",
     "passwordMin": "Le mot de passe doit contenir au moins 6 caracteres.",

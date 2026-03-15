@@ -5,6 +5,7 @@ import App from '@/App'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/shared/LoadingState'
 import { ProtectedRoute, PublicOnlyRoute, RequireCompletedOnboarding } from '@/components/shared/ProtectedRoute'
+import { RouteErrorBoundary } from '@/components/shared/RouteErrorBoundary'
 
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const TransactionsPage = lazy(() => import('@/pages/TransactionsPage'))
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
       {
@@ -40,6 +42,7 @@ export const router = createBrowserRouter([
       },
       {
         element: <ProtectedRoute />,
+        errorElement: <RouteErrorBoundary />,
         children: [
           { path: 'onboarding', element: renderLazyPage(OnboardingPage) },
         ],
@@ -52,6 +55,7 @@ export const router = createBrowserRouter([
             </RequireCompletedOnboarding>
           </ProtectedRoute>
         ),
+        errorElement: <RouteErrorBoundary />,
         children: [
           { path: 'dashboard', element: renderLazyPage(DashboardPage) },
           { path: 'transactions', element: renderLazyPage(TransactionsPage) },
