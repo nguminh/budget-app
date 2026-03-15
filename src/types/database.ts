@@ -53,6 +53,7 @@
           category_name: string
           note: string | null
           transaction_date: string
+          transaction_time: string
           source: 'manual'
           created_at: string
           updated_at: string
@@ -68,6 +69,7 @@
           category_name: string
           note?: string | null
           transaction_date: string
+          transaction_time?: string
           source?: 'manual'
         }
         Update: Partial<Database['public']['Tables']['transactions']['Insert']>
