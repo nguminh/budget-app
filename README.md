@@ -80,7 +80,7 @@ Important implementation note:
 
 ## Environment variables
 
-Create a `.env` file in the project root. You can start from [`./.env copy.example`](/D:/budget-app/.env%20copy.example) and add the missing values.
+Create a `.env` file in the project root. You can start from [`.env.example`](/D:/budget-app/.env.example) and add the missing values.
 
 Required:
 
@@ -89,19 +89,26 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 ```
 
-Optional, for Gemini-assisted import:
+These two values are expected to be public in a browser app. They are not secrets.
+
+- `VITE_SUPABASE_URL` identifies your Supabase project
+- `VITE_SUPABASE_ANON_KEY` is the public client key
+
+Important:
+
+- Do not put your `service_role` key in the frontend
+- Keep row-level security enabled and policies correct, because the anon key is public by design
+
+Optional, for local Gemini-assisted import development with the Edge Function:
 
 ```env
 GEMINI_API_KEY=
 GEMINI_MODEL=
 ```
 
-The app also accepts:
+If you are using a remote Supabase project for Gemini imports, you can remove `GEMINI_API_KEY` and `GEMINI_MODEL` from the app `.env`.
 
-```env
-VITE_GEMINI_API_KEY=
-VITE_GEMINI_MODEL=
-```
+These values should be stored as Supabase Edge Function secrets in production, not exposed as browser env vars.
 
 ## Local development
 
@@ -127,6 +134,14 @@ The Vite dev server usually runs at `http://localhost:5173`.
 3. In Supabase Auth, enable the Email provider.
 4. For quick local testing, optionally disable email confirmation.
 5. Run [`supabase/schema.sql`](/D:/budget-app/supabase/schema.sql) in the SQL editor.
+6. Set Gemini secrets and deploy the Edge Function used by imports:
+
+```bash
+supabase secrets set GEMINI_API_KEY=your-key GEMINI_MODEL=your-model
+supabase functions deploy extract-transactions
+```
+
+If you are working directly against a remote Supabase project, those secrets and the function deployment happen in Supabase itself. Keeping the files in this repo does not automatically create the function remotely.
 
 The schema sets up:
 
@@ -161,6 +176,32 @@ Run the full suite with:
 ```bash
 npm test
 ```
+
+## Production hosting
+
+Recommended setup:
+
+- Vercel for the Vite frontend
+- Supabase for auth, database, and the `extract-transactions` Edge Function
+
+Deployment checklist:
+
+1. In Vercel, set only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+2. Deploy the frontend from this repo. [`vercel.json`](/D:/budget-app/vercel.json) includes the SPA rewrite needed for React Router.
+3. In Supabase, set Gemini secrets and deploy the Edge Function:
+
+```bash
+supabase secrets set GEMINI_API_KEY=your-key GEMINI_MODEL=your-model
+supabase functions deploy extract-transactions
+```
+
+4. In Supabase Auth, add your Vercel production URL and preview URL patterns to the allowed redirect URLs.
+
+Notes:
+
+- Your Vercel deploy branch does not need to be `main`
+- Different deploy branches can still point to the same Supabase project if they share the same public env vars
+- Use a separate Supabase project if you want true staging isolation
 
 ## Known limitations
 
