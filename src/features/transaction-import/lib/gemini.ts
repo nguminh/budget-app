@@ -26,12 +26,16 @@ type GeminiResponse = {
 
 const env = import.meta.env as ImportMetaEnv
 
+function readEnv(key: string) {
+  return env[key] ?? env[String.fromCharCode(0xfeff) + key]
+}
+
 function readGeminiEnv(key: 'GEMINI_API_KEY' | 'GEMINI_MODEL') {
   if (key === 'GEMINI_API_KEY') {
-    return env.GEMINI_API_KEY ?? env.VITE_GEMINI_API_KEY
+    return readEnv('GEMINI_API_KEY') ?? readEnv('VITE_GEMINI_API_KEY')
   }
 
-  return env.GEMINI_MODEL ?? env.VITE_GEMINI_MODEL
+  return readEnv('GEMINI_MODEL') ?? readEnv('VITE_GEMINI_MODEL')
 }
 
 function extractJsonPayload(value: string) {
